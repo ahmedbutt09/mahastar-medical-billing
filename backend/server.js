@@ -7,21 +7,18 @@ const sgMail = require('@sendgrid/mail');
 
 dotenv.config();
 
-// --- KEEP YOUR SENDGRID INITIALIZATION HERE ---
+// Initialize SendGrid
 if (process.env.SENDGRID_API_KEY) {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-  console.log('✅ SendGrid initialized');
-} else {
-  console.log('⚠️ SendGrid API key not found');
 }
 
 const app = express();
 
-// --- UPDATED CORS (Allows Vercel to talk to Backend) ---
+// --- CORS CONFIGURATION ---
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://mahastar-medical-billing.vercel.app',
-  /\.vercel\.app$/ 
+  'https://mahastar-medical-billing.vercel.app', // Your frontend URL
+  /\.vercel\.app$/                               // Allows preview links
 ];
 
 app.use(cors({
@@ -683,22 +680,18 @@ app.get('/api/test-sendgrid', async (req, res) => {
   }
 });
 // A simple health check to test if the backend is alive
+// Health check for Vercel testing
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'ok' });
+  res.status(200).json({ success: true, message: 'Backend is live' });
 });
 
-// Also add a "root" check just in case
-app.get('/', (req, res) => {
-  res.send('MahaStar Server is Live');
-});
-
-// For local development
+// Only start the server if running locally
 if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
-    console.log(`🚀 Local Server running on port ${PORT}`);
+    console.log(`🚀 Server running on port ${PORT}`);
   });
 }
 
-// CRITICAL: This is what Vercel needs to run your code
+// CRITICAL: Export for Vercel
 module.exports = app;
