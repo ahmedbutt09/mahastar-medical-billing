@@ -4,11 +4,6 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   base: '/',
-  build: {
-    outDir: 'dist',
-    sourcemap: false,
-    minify: 'esbuild',
-  },
   server: {
     port: 5173,
     proxy: {
@@ -16,6 +11,21 @@ export default defineConfig({
         target: 'http://localhost:5000',
         changeOrigin: true,
       }
+    }
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    minify: 'esbuild',
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
+    }
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      target: 'es2020'
     }
   }
 })
