@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+// 1. Change this import to use your new api.js
+import api from '../api'; 
 import { Calendar, User, Clock, ArrowLeft } from 'lucide-react';
 import SocialShare from '../components/SocialShare';
 import Comments from '../components/Comments';
@@ -12,10 +13,11 @@ const BlogPost = () => {
   const [loading, setLoading] = useState(true);
   const [tags, setTags] = useState([]);
 
-  // Define fetchTags first
+  // Define fetchTags
   const fetchTags = async (postId) => {
     try {
-      const response = await axios.get(`/api/blog/posts/${postId}/tags`);
+      // 2. Use api.get instead of axios.get
+      const response = await api.get(`/api/blog/posts/${postId}/tags`);
       setTags(response.data.data || []);
     } catch (error) {
       console.error('Error fetching tags:', error);
@@ -27,7 +29,8 @@ const BlogPost = () => {
   const fetchPost = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`/api/blog/posts/${slug}`);
+      // 3. Use api.get instead of axios.get
+      const response = await api.get(`/api/blog/posts/${slug}`);
       if (response.data.success && response.data.data) {
         setPost(response.data.data);
         // Fetch tags after post is loaded
@@ -44,7 +47,6 @@ const BlogPost = () => {
     }
   };
 
-  // UseEffect to trigger fetch
   useEffect(() => {
     if (slug) {
       fetchPost();
@@ -75,13 +77,11 @@ const BlogPost = () => {
   return (
     <div className="pt-20">
       <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Back button */}
         <Link to="/blog" className="inline-flex items-center text-primary hover:text-secondary mb-8 transition-colors">
           <ArrowLeft size={20} className="mr-2" />
           Back to Blog
         </Link>
 
-        {/* Header */}
         <header className="mb-8">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-dark mb-4 leading-tight">
             {post.title}
@@ -123,13 +123,11 @@ const BlogPost = () => {
           )}
         </header>
 
-        {/* Content */}
         <div 
           className="prose prose-lg max-w-none prose-headings:text-dark prose-headings:font-bold prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3 prose-p:text-gray-700 prose-p:leading-relaxed prose-ul:text-gray-700 prose-li:mb-2 prose-strong:text-primary prose-a:text-primary hover:prose-a:text-secondary"
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
 
-        {/* Tags Section */}
         {tags.length > 0 && (
           <div className="mt-8 pt-6 border-t border-gray-200">
             <div className="flex flex-wrap items-center gap-2">
@@ -147,7 +145,6 @@ const BlogPost = () => {
           </div>
         )}
 
-        {/* Category Section */}
         {post.category && (
           <div className="mt-4 flex items-center gap-2">
             <span className="text-sm font-semibold text-gray-700">Category:</span>
@@ -157,12 +154,10 @@ const BlogPost = () => {
           </div>
         )}
 
-        {/* Comments Section */}
         {post.id && (
           <Comments postId={post.id} comments={post.comments || []} />
         )}
 
-        {/* CTA Section */}
         <div className="bg-gradient-to-r from-primary to-secondary text-white rounded-2xl p-8 mt-12 text-center">
           <h3 className="text-2xl md:text-3xl font-bold mb-4">Need Help with Medical Billing?</h3>
           <p className="text-lg mb-6 opacity-95">Let our experts handle your revenue cycle management</p>

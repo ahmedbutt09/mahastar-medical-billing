@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone } from 'lucide-react';
 import { FaFacebook, FaTwitter, FaLinkedin } from 'react-icons/fa';
-import axios from 'axios';
+// 1. Import your custom api instance
+import api from '../api'; 
 import toast from 'react-hot-toast';
 
 const Footer = () => {
@@ -18,11 +19,13 @@ const Footer = () => {
     
     setSubscribing(true);
     try {
-      await axios.post('/api/subscribe', { email });
+      // 2. Use api.post and ensured endpoint consistency
+      await api.post('/api/newsletter', { email });
       toast.success('Subscribed successfully!');
       setEmail('');
     } catch (error) {
       toast.error('Failed to subscribe. Please try again.');
+      console.error('Subscription error:', error);
     } finally {
       setSubscribing(false);
     }

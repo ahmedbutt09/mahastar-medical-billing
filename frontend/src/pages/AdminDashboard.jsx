@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+// 1. Import your custom api instance
+import api from '../api'; 
 import toast from 'react-hot-toast';
 import { Mail, Phone, Calendar, Eye, CheckCircle, XCircle, 
   MessageCircle, Users, FileText, TrendingUp, Clock,
   Check, X, Trash2, RefreshCw, Send, Download } from 'lucide-react';
+
 const AdminDashboard = () => {
   const [contacts, setContacts] = useState([]);
   const [comments, setComments] = useState([]);
@@ -15,31 +17,31 @@ const AdminDashboard = () => {
   const [emailSubject, setEmailSubject] = useState('');
   const [emailContent, setEmailContent] = useState('');
   const [showEmailModal, setShowEmailModal] = useState(false);
- 
-const [stats, setStats] = useState({
-  totalContacts: 0,
-  pendingContacts: 0,
-  totalComments: 0,
-  pendingComments: 0,
-  totalSubscribers: 0
-});
+  
+  const [stats, setStats] = useState({
+    totalContacts: 0,
+    pendingContacts: 0,
+    totalComments: 0,
+    pendingComments: 0,
+    totalSubscribers: 0
+  });
   const navigate = useNavigate();
 
-useEffect(() => {
-  // Check authentication
-  const isAuth = localStorage.getItem('adminAuth');
-  if (!isAuth) {
-    navigate('/admin');
-    return;
-  }
-  fetchContacts();
-  fetchComments();
-  fetchSubscribers(); 
-}, [navigate]);
+  useEffect(() => {
+    const isAuth = localStorage.getItem('adminAuth');
+    if (!isAuth) {
+      navigate('/admin');
+      return;
+    }
+    fetchContacts();
+    fetchComments();
+    fetchSubscribers(); 
+  }, [navigate]);
 
   const fetchContacts = async () => {
     try {
-      const response = await axios.get('/api/contacts');
+      // 2. Use api.get
+      const response = await api.get('/api/contacts');
       const contactsData = response.data.data || [];
       setContacts(contactsData);
       setStats(prev => ({
@@ -54,8 +56,7 @@ useEffect(() => {
 
   const fetchComments = async () => {
     try {
-      // Fetch all comments from all posts
-      const response = await axios.get('/api/blog/comments/all');
+      const response = await api.get('/api/blog/comments/all');
       const commentsData = response.data.data || [];
       setComments(commentsData);
       setStats(prev => ({
@@ -65,82 +66,64 @@ useEffect(() => {
       }));
     } catch (error) {
       console.error('Error fetching comments:', error);
-      // If the endpoint doesn't exist, we'll use a fallback
       setComments([]);
     } finally {
       setLoading(false);
     }
   };
-  // Add fetch function after fetchComments
-const fetchSubscribers = async () => {
-  try {
-    const response = await axios.get('/api/newsletter');
-    setSubscribers(response.data.data || []);
-    setStats(prev => ({
-      ...prev,
-      totalSubscribers: response.data.data?.length || 0
-    }));
-  } catch (error) {
-    console.error('Error fetching subscribers:', error);
-  }
-};
 
-  // Add delete subscriber function
-const deleteSubscriber = async (id) => {
-  if (window.confirm('Are you sure you want to remove this subscriber?')) {
+  const fetchSubscribers = async () => {
     try {
-      await axios.delete(`/api/newsletter/${id}`);
-      toast.success('Subscriber removed successfully');
-      fetchSubscribers();
+      const response = await api.get('/api/newsletter');
+      setSubscribers(response.data.data || []);
+      setStats(prev => ({
+        ...prev,
+        totalSubscribers: response.data.data?.length || 0
+      }));
     } catch (error) {
-      toast.error('Failed to remove subscriber');
+      console.error('Error fetching subscribers:', error);
     }
-  }
-};
-// Add send newsletter function
-const sendNewsletter = async () => {
-  if (!emailSubject || !emailContent) {
-    toast.error('Please enter subject and content');
-    return;
-  }
-  
-  try {
-    await axios.post('/api/newsletter/send', {
-      subject: emailSubject,
-      content: emailContent,
-      subscribers: subscribers.map(s => s.email)
-    });
-    toast.success(`Newsletter sent to ${subscribers.length} subscribers`);
-    setShowEmailModal(false);
-    setEmailSubject('');
-    setEmailContent('');
-  } catch (error) {
-    toast.error('Failed to send newsletter');
-  }
-};
+  };
 
-// Add export subscribers function
-const exportSubscribers = () => {
-  const csv = subscribers.map(s => `${s.email},${new Date(s.subscribed_at).toLocaleDateString()}`).join('\n');
-  const blob = new Blob([`Email,Subscribed Date\n${csv}`], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'subscribers.csv';
-  a.click();
-  URL.revokeObjectURL(url);
-  toast.success('Subscribers exported successfully');
-}; 
+  const deleteSubscriber = async (id) => {
+    if (window.confirm('Are you sure you want to remove this subscriber?')) {
+      try {
+        // 3. Use api.delete
+        await api.delete(`/api/newsletter/${id}`);
+        toast.success('Subscriber removed successfully');
+        fetchSubscribers();
+      } catch (error) {
+        toast.error('Failed to remove subscriber');
+      }
+    }
+  };
 
-  const handleLogout = () => {
-    localStorage.removeItem('adminAuth');
-    navigate('/admin');
-    toast.success('Logged out successfully');
+  const sendNewsletter = async () => {
+    if (!emailSubject || !emailContent) {
+      toast.error('Please enter subject and content');
+      return;
+    }
+    
+    try {
+      // 4. Use api.post
+      await api.post('/api/newsletter/send', {
+        subject: emailSubject,
+        content: emailContent,
+        subscribers: subscribers.map(s => s.email)
+      });
+      toast.success(`Newsletter sent to ${subscribers.length} subscribers`);
+      setShowEmailModal(false);
+      setEmailSubject('');
+      setEmailContent('');
+    } catch (error) {
+      toast.error('Failed to send newsletter');
+    }
   };
 
   const updateContactStatus = async (id, status) => {
     try {
-      await axios.put(`/api/contacts/${id}`, { status });
+      // 5. Use api.put
+      await api.put(`/api/contacts/${id}`, { status });
       toast.success(`Contact marked as ${status}`);
       fetchContacts();
     } catch (error) {
@@ -150,7 +133,7 @@ const exportSubscribers = () => {
 
   const approveComment = async (id) => {
     try {
-      await axios.put(`/api/blog/comments/${id}/approve`);
+      await api.put(`/api/blog/comments/${id}/approve`);
       toast.success('Comment approved successfully');
       fetchComments();
     } catch (error) {
@@ -161,7 +144,7 @@ const exportSubscribers = () => {
   const deleteComment = async (id) => {
     if (window.confirm('Are you sure you want to delete this comment?')) {
       try {
-        await axios.delete(`/api/blog/comments/${id}`);
+        await api.delete(`/api/blog/comments/${id}`);
         toast.success('Comment deleted successfully');
         fetchComments();
       } catch (error) {
@@ -170,24 +153,24 @@ const exportSubscribers = () => {
     }
   };
 
-  // Add this endpoint to your backend if not exists
-  const fetchAllCommentsForAdmin = async () => {
-    try {
-      // This requires a new backend endpoint
-      const response = await axios.get('/api/blog/comments/all');
-      return response.data.data;
-    } catch (error) {
-      // Fallback: fetch comments per post
-      const postsResponse = await axios.get('h/api/blog/posts');
-      const posts = postsResponse.data.data || [];
-      let allComments = [];
-      for (const post of posts) {
-        const commentsResponse = await axios.get(`/api/blog/comments/${post.id}`);
-        allComments = [...allComments, ...(commentsResponse.data.data || [])];
-      }
-      return allComments;
-    }
+  const handleLogout = () => {
+    localStorage.removeItem('adminAuth');
+    navigate('/admin');
+    toast.success('Logged out successfully');
   };
+
+  // CSV export doesn't need API changes as it's purely client-side
+  const exportSubscribers = () => {
+    const csv = subscribers.map(s => `${s.email},${new Date(s.subscribed_at).toLocaleDateString()}`).join('\n');
+    const blob = new Blob([`Email,Subscribed Date\n${csv}`], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'subscribers.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success('Subscribers exported successfully');
+  }; 
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
@@ -276,21 +259,21 @@ const exportSubscribers = () => {
               )}
             </button>
             <button
-  onClick={() => setActiveTab('subscribers')}
-  className={`px-6 py-3 font-semibold transition-colors ${
-    activeTab === 'subscribers'
-      ? 'text-primary border-b-2 border-primary'
-      : 'text-gray-600 hover:text-primary'
-  }`}
->
-  <Users className="inline-block w-4 h-4 mr-2" />
-  Subscribers
-  {stats.totalSubscribers > 0 && (
-    <span className="ml-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-      {stats.totalSubscribers}
-    </span>
-  )}
-</button>
+              onClick={() => setActiveTab('subscribers')}
+              className={`px-6 py-3 font-semibold transition-colors ${
+                activeTab === 'subscribers'
+                  ? 'text-primary border-b-2 border-primary'
+                  : 'text-gray-600 hover:text-primary'
+              }`}
+            >
+              <Users className="inline-block w-4 h-4 mr-2" />
+              Subscribers
+              {stats.totalSubscribers > 0 && (
+                <span className="ml-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                  {stats.totalSubscribers}
+                </span>
+              )}
+            </button>
           </div>
         </div>
 
@@ -443,59 +426,61 @@ const exportSubscribers = () => {
           </div>
         )}
 
-{activeTab === 'subscribers' && (
-  <div className="bg-white rounded-xl shadow-md overflow-hidden">
-    <div className="p-4 border-b flex justify-between items-center">
-      <h3 className="text-lg font-semibold">Newsletter Subscribers</h3>
-      <div className="flex gap-2">
-        <button onClick={exportSubscribers} className="btn-secondary text-sm">
-          <Download size={16} className="inline mr-1" />
-          Export CSV
-        </button>
-        <button onClick={() => setShowEmailModal(true)} className="btn-primary text-sm">
-          <Send size={16} className="inline mr-1" />
-          Send Newsletter
-        </button>
-      </div>
-    </div>
-    <div className="overflow-x-auto">
-      <table className="w-full">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Subscribed Date</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200">
-          {subscribers.length === 0 ? (
-            <tr>
-              <td colSpan="3" className="px-6 py-4 text-center">No subscribers yet</td>
-            </tr>
-          ) : (
-            subscribers.map((subscriber) => (
-              <tr key={subscriber.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4">{subscriber.email}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">
-                  {new Date(subscriber.subscribed_at).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4">
-                  <button
-                    onClick={() => deleteSubscriber(subscriber.id)}
-                    className="text-red-600 hover:text-red-800"
-                    title="Remove Subscriber"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-    </div>
-  </div>
-)}
+        {/* Subscribers Tab */}
+        {activeTab === 'subscribers' && (
+          <div className="bg-white rounded-xl shadow-md overflow-hidden">
+            <div className="p-4 border-b flex justify-between items-center">
+              <h3 className="text-lg font-semibold">Newsletter Subscribers</h3>
+              <div className="flex gap-2">
+                <button onClick={exportSubscribers} className="btn-secondary text-sm">
+                  <Download size={16} className="inline mr-1" />
+                  Export CSV
+                </button>
+                <button onClick={() => setShowEmailModal(true)} className="btn-primary text-sm">
+                  <Send size={16} className="inline mr-1" />
+                  Send Newsletter
+                </button>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Subscribed Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {subscribers.length === 0 ? (
+                    <tr>
+                      <td colSpan="3" className="px-6 py-4 text-center">No subscribers yet</td>
+                    </tr>
+                  ) : (
+                    subscribers.map((subscriber) => (
+                      <tr key={subscriber.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4">{subscriber.email}</td>
+                        <td className="px-6 py-4 text-sm text-gray-600">
+                          {new Date(subscriber.subscribed_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4">
+                          <button
+                            onClick={() => deleteSubscriber(subscriber.id)}
+                            className="text-red-600 hover:text-red-800"
+                            title="Remove Subscriber"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
         {/* Modal for viewing contact details */}
         {selectedContact && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -530,52 +515,53 @@ const exportSubscribers = () => {
             </div>
           </div>
         )}
-       
-{showEmailModal && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div className="bg-white rounded-xl max-w-2xl w-full mx-4 p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">Send Newsletter</h2>
-        <button onClick={() => setShowEmailModal(false)} className="text-gray-500 hover:text-gray-700">
-          <X size={24} />
-        </button>
-      </div>
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
-          <input
-            type="text"
-            value={emailSubject}
-            onChange={(e) => setEmailSubject(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-            placeholder="Newsletter Subject"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
-          <textarea
-            rows="8"
-            value={emailContent}
-            onChange={(e) => setEmailContent(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-            placeholder="Write your newsletter content here..."
-          />
-        </div>
-        <div className="bg-gray-50 p-3 rounded">
-          <p className="text-sm text-gray-600">Will be sent to: <strong>{subscribers.length}</strong> subscribers</p>
-        </div>
-        <div className="flex justify-end gap-3">
-          <button onClick={() => setShowEmailModal(false)} className="btn-secondary">
-            Cancel
-          </button>
-          <button onClick={sendNewsletter} className="btn-primary">
-            Send Newsletter
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
+        
+        {/* Modal for sending newsletter */}
+        {showEmailModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl max-w-2xl w-full mx-4 p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold">Send Newsletter</h2>
+                <button onClick={() => setShowEmailModal(false)} className="text-gray-500 hover:text-gray-700">
+                  <X size={24} />
+                </button>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                  <input
+                    type="text"
+                    value={emailSubject}
+                    onChange={(e) => setEmailSubject(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                    placeholder="Newsletter Subject"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
+                  <textarea
+                    rows="8"
+                    value={emailContent}
+                    onChange={(e) => setEmailContent(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                    placeholder="Write your newsletter content here..."
+                  />
+                </div>
+                <div className="bg-gray-50 p-3 rounded">
+                  <p className="text-sm text-gray-600">Will be sent to: <strong>{subscribers.length}</strong> subscribers</p>
+                </div>
+                <div className="flex justify-end gap-3">
+                  <button onClick={() => setShowEmailModal(false)} className="btn-secondary">
+                    Cancel
+                  </button>
+                  <button onClick={sendNewsletter} className="btn-primary">
+                    Send Newsletter
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

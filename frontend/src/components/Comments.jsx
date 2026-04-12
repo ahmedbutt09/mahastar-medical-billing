@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+// 1. Import your custom api instance
+import api from '../api'; 
 import toast from 'react-hot-toast';
 import { User, Calendar, MessageCircle } from 'lucide-react';
 
@@ -22,7 +23,8 @@ const Comments = ({ postId, comments: initialComments }) => {
 
     setIsSubmitting(true);
     try {
-      await axios.post('/api/blog/comments', {
+      // 2. Use api.post instead of axios.post
+      await api.post('/api/blog/comments', {
         post_id: postId,
         ...newComment
       });
@@ -30,6 +32,7 @@ const Comments = ({ postId, comments: initialComments }) => {
       setNewComment({ author_name: '', author_email: '', content: '' });
     } catch (error) {
       toast.error('Failed to submit comment');
+      console.error('Comment error:', error);
     } finally {
       setIsSubmitting(false);
     }

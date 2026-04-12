@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { Mail, Phone, MapPin, Clock } from 'lucide-react';
-import axios from 'axios';
+// 1. Import your custom api instance instead of standard axios
+import api from '../api'; 
 
 const Contact = () => {
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
@@ -11,10 +12,13 @@ const Contact = () => {
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/contact`, data);
+      // 2. Use api.post and a relative path. 
+      // The base URL is already handled in api.js!
+      await api.post('/api/contact', data);
       toast.success('Message sent successfully! We\'ll get back to you soon.');
       reset();
-    } catch {
+    } catch (error) {
+      console.error('Submission error:', error);
       toast.error('Failed to send message. Please try again.');
     } finally {
       setIsSubmitting(false);

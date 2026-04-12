@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+// 1. Import your custom api instance
+import api from '../api'; 
 import toast from 'react-hot-toast';
 import { Calendar, User, Clock, ArrowRight } from 'lucide-react';
 
@@ -19,7 +20,8 @@ const Blog = () => {
 
   const fetchTags = async () => {
     try {
-      const response = await axios.get('/api/tags');
+      // 2. Use api.get
+      const response = await api.get('/api/tags');
       setAllTags(response.data.data || []);
     } catch (error) {
       console.error('Error fetching tags:', error);
@@ -30,26 +32,21 @@ const Blog = () => {
     setLoading(true);
     try {
       let url = '/api/blog/posts';
-      const params = [];
+      const params = new URLSearchParams();
       
       if (selectedCategory !== "All") {
-        params.push(`category=${encodeURIComponent(selectedCategory)}`);
+        params.append('category', selectedCategory);
       }
       if (selectedTag) {
-        params.push(`tag=${encodeURIComponent(selectedTag)}`);
-      }
-      if (params.length) {
-        url += `?${params.join('&')}`;
+        params.append('tag', selectedTag);
       }
       
-      console.log('Fetching posts from:', url); // Debug log
-      const response = await axios.get(url);
-      console.log('Posts received:', response.data.data?.length); // Debug log
+      // 3. Use api.get with the params object for cleaner code
+      const response = await api.get(url, { params });
       
       const postsData = response.data.data || [];
       setPosts(postsData);
       
-      // Extract unique categories from fetched posts
       const uniqueCategories = ['All', ...new Set(postsData.map(post => post.category).filter(Boolean))];
       setCategories(uniqueCategories);
     } catch (error) {
@@ -61,18 +58,31 @@ const Blog = () => {
     }
   };
 
+  const handleNewsletterSubmit = async (e) => {
+    e.preventDefault();
+    const email = e.target.email.value;
+    try {
+      // 4. Use api.post for newsletter subscription
+      await api.post('/api/subscribe', { email });
+      toast.success('Subscribed successfully!');
+      e.target.reset();
+    } catch (error) {
+      toast.error('Failed to subscribe');
+    }
+  };
+
   const handleTagClick = (tagName) => {
     if (selectedTag === tagName) {
-      setSelectedTag(null); // Deselect if already selected
+      setSelectedTag(null);
     } else {
-      setSelectedTag(tagName); // Select new tag
-      setSelectedCategory("All"); // Reset category when tag is selected
+      setSelectedTag(tagName);
+      setSelectedCategory("All");
     }
   };
 
   const handleCategoryClick = (category) => {
     setSelectedCategory(category);
-    setSelectedTag(null); // Reset tag when category is selected
+    setSelectedTag(null);
   };
 
   if (loading) {
@@ -252,17 +262,7 @@ const Blog = () => {
           <h2 className="text-3xl font-bold mb-4">Subscribe to Our Newsletter</h2>
           <p className="text-xl mb-8">Get the latest healthcare billing insights delivered to your inbox</p>
           <form 
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const email = e.target.email.value;
-              try {
-                await axios.post('/api/subscribe', { email });
-                toast.success('Subscribed successfully!');
-                e.target.reset();
-              } catch (error) {
-                toast.error('Failed to subscribe');
-              }
-            }}
+            onSubmit={handleNewsletterSubmit}
             className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto"
           >
             <input
