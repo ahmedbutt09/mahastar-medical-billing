@@ -684,7 +684,12 @@ app.get('/api/test-sendgrid', async (req, res) => {
 });
 // A simple health check to test if the backend is alive
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'ok', message: 'MahaStar Backend is running' });
+  res.status(200).json({ status: 'ok' });
+});
+
+// Also add a "root" check just in case
+app.get('/', (req, res) => {
+  res.send('MahaStar Server is Live');
 });
 
 // For local development
