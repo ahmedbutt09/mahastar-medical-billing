@@ -3,11 +3,11 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
-const sgMail = require('@sendgrid/mail'); // Add this line
+const sgMail = require('@sendgrid/mail');
 
 dotenv.config();
 
-// Initialize SendGrid
+// --- KEEP YOUR SENDGRID INITIALIZATION HERE ---
 if (process.env.SENDGRID_API_KEY) {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
   console.log('✅ SendGrid initialized');
@@ -16,18 +16,21 @@ if (process.env.SENDGRID_API_KEY) {
 }
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
-// Middleware
+// --- UPDATED CORS (Allows Vercel to talk to Backend) ---
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://mahastar-medical-billing.vercel.app',
+  /\.vercel\.app$/ 
+];
+
 app.use(cors({
-  origin: [
-    'http://localhost:5173', 
-    'https://mahastar-medical-billing.vercel.app' // Your frontend URL
-  ],
+  origin: allowedOrigins,
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 app.use(express.json());
 
 // Supabase Clients
@@ -679,9 +682,18 @@ app.get('/api/test-sendgrid', async (req, res) => {
     });
   }
 });
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📝 Contact form endpoint: http://localhost:${PORT}/api/contact`);
-  console.log(`📋 Contacts endpoint: http://localhost:${PORT}/api/contacts`);
-  console.log(`❤️ Health check: http://localhost:${PORT}/api/health`);
+// A simple health check to test if the backend is alive
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'MahaStar Backend is running' });
 });
+
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Local Server running on port ${PORT}`);
+  });
+}
+
+// CRITICAL: This is what Vercel needs to run your code
+module.exports = app;
