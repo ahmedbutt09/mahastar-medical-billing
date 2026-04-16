@@ -18,6 +18,7 @@ const DynamicPage = () => {
   const [pageData, setPageData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [debugInfo, setDebugInfo] = useState({});
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -28,23 +29,56 @@ const DynamicPage = () => {
   useEffect(() => {
     const fetchPageData = async () => {
       setLoading(true);
+      setError(null);
+      
+      console.log('🔍 DynamicPage mounted with:', { type, slug });
+      console.log('📡 API Base URL:', api.defaults.baseURL);
+      
       try {
-        const response = await api.get(`/api/dynamic-page/${type}/${slug}`);
+        const url = `/api/dynamic-page/${type}/${slug}`;
+        console.log(`📤 Fetching: ${url}`);
+        
+        const response = await api.get(url);
+        
+        console.log('📥 Response:', response.data);
+        setDebugInfo({
+          status: response.status,
+          hasData: !!response.data.data,
+          dataKeys: response.data.data ? Object.keys(response.data.data) : []
+        });
+        
         if (response.data.success && response.data.data) {
           setPageData(response.data.data);
+          console.log('✅ Page data loaded:', response.data.data.page_title);
         } else {
-          setError('Page not found');
+          setError('Page not found in database');
+          console.error('❌ No data in response');
         }
       } catch (err) {
-        console.error('Error fetching page:', err);
-        setError('Failed to load page. Please try again.');
+        console.error('❌ Fetch error:', err);
+        console.error('Error details:', {
+          message: err.message,
+          response: err.response?.data,
+          status: err.response?.status
+        });
+        
+        setError(err.response?.data?.error || err.message || 'Failed to load page');
+        setDebugInfo({
+          error: err.message,
+          status: err.response?.status,
+          responseData: err.response?.data
+        });
       } finally {
         setLoading(false);
       }
     };
     
-    fetchPageData();
-    window.scrollTo(0, 0);
+    if (type && slug) {
+      fetchPageData();
+    } else {
+      setError('Invalid page parameters');
+      setLoading(false);
+    }
   }, [type, slug]);
 
   const handleSubmit = async (e) => {
@@ -62,6 +96,53 @@ const DynamicPage = () => {
     }
   };
 
+  // Debug view - show this while debugging
+  if (debugInfo.error || error) {
+    return (
+      <div className="pt-24 min-h-screen flex items-center justify-center">
+        <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-lg">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Debug Information</h1>
+          
+          <div className="space-y-4">
+            <div className="border-b pb-2">
+              <h2 className="font-semibold text-gray-700">Request Parameters:</h2>
+              <p className="font-mono text-sm">Type: {type}</p>
+              <p className="font-mono text-sm">Slug: {slug}</p>
+            </div>
+            
+            <div className="border-b pb-2">
+              <h2 className="font-semibold text-gray-700">API Configuration:</h2>
+              <p className="font-mono text-sm">Base URL: {api.defaults.baseURL}</p>
+              <p className="font-mono text-sm">Full URL: {api.defaults.baseURL}/api/dynamic-page/{type}/{slug}</p>
+            </div>
+            
+            <div className="border-b pb-2">
+              <h2 className="font-semibold text-gray-700">Error:</h2>
+              <p className="font-mono text-sm text-red-600">{error}</p>
+              {debugInfo.responseData && (
+                <pre className="text-xs bg-gray-100 p-2 mt-2 rounded overflow-auto">
+                  {JSON.stringify(debugInfo.responseData, null, 2)}
+                </pre>
+              )}
+            </div>
+            
+            <div className="mt-6 flex gap-3">
+              <button 
+                onClick={() => window.location.reload()} 
+                className="bg-primary text-white px-4 py-2 rounded hover:bg-secondary"
+              >
+                Retry
+              </button>
+              <Link to="/" className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                Go Home
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="pt-24 min-h-screen flex items-center justify-center">
@@ -70,7 +151,7 @@ const DynamicPage = () => {
     );
   }
 
-  if (error || !pageData) {
+  if (!pageData) {
     return (
       <div className="pt-24 min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -161,7 +242,7 @@ const DynamicPage = () => {
                 </>
               )}
 
-              {/* Items List (Specialties, Services, etc.) */}
+              {/* Items List */}
               {itemsList.length > 0 && (
                 <>
                   <h3 className="text-2xl font-bold text-dark mb-4">
@@ -203,10 +284,10 @@ const DynamicPage = () => {
             <div className="lg:col-span-1">
               <div className="bg-white rounded-xl shadow-xl p-6 border border-gray-200 sticky top-24">
                 <h3 className="text-xl font-bold text-dark mb-4">
-                  {pageData.form_title || `Request Information`}
+                  {pageData.form_title || 'Request Information'}
                 </h3>
                 <p className="text-gray-600 text-sm mb-6">
-                  {pageData.form_subtitle || `Our specialist will contact you within 24 hours.`}
+                  {pageData.form_subtitle || 'Our specialist will contact you within 24 hours.'}
                 </p>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>

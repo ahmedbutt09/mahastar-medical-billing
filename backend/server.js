@@ -679,11 +679,7 @@ app.get('/api/test-sendgrid', async (req, res) => {
     });
   }
 });
-// A simple health check to test if the backend is alive
-// Health check for Vercel testing
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ success: true, message: 'Backend is live' });
-});
+
 
 // Only start the server if running locally
 if (process.env.NODE_ENV !== 'production') {
@@ -1588,6 +1584,11 @@ app.get('/api/dynamic-pages/summary', async (req, res) => {
     console.error('Error fetching summary:', error);
     res.status(500).json({ success: false, error: error.message });
   }
+});
+// A simple health check to test if the backend is alive
+// Health check for Vercel testing
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ success: true, message: 'Backend is live' });
 });
 // CRITICAL: Export for Vercel
 module.exports = app;
