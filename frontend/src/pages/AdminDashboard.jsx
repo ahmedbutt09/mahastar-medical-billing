@@ -366,6 +366,13 @@ const AdminDashboard = () => {
         {/* Tab Navigation - Expanded */}
         <div className="bg-white rounded-xl shadow-md mb-6 overflow-x-auto">
           <div className="flex border-b min-w-max">
+            {/* Add this button in the tab navigation */}
+<button 
+  onClick={() => setActiveTab('page-content')} 
+  className={`px-6 py-3 font-semibold transition-colors ${activeTab === 'page-content' ? 'text-primary border-b-2 border-primary' : 'text-gray-600 hover:text-primary'}`}
+>
+  <FileText className="inline-block w-4 h-4 mr-2" /> Page Content
+</button>
             <button onClick={() => setActiveTab('contacts')} className={`px-6 py-3 font-semibold transition-colors ${activeTab === 'contacts' ? 'text-primary border-b-2 border-primary' : 'text-gray-600 hover:text-primary'}`}>
               <Mail className="inline-block w-4 h-4 mr-2" /> Contacts
             </button>
@@ -503,6 +510,13 @@ const AdminDashboard = () => {
             </div>
           </div>
         )}
+{/* Page Content Tab */}
+{activeTab === 'page-content' && (
+  <PageContentManager />
+  
+)}
+
+{activeTab === 'dynamic-pages' && (<DynamicPagesManager />)}
 
         {/* Keep existing Comments and Subscribers tabs */}
         {/* ... (same as before) ... */}

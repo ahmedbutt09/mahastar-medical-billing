@@ -1277,5 +1277,317 @@ app.get('/api/admin/stats', async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+// ============= PAGE CONTENT MANAGEMENT =============
+
+// Get all page content (for admin)
+app.get('/api/page-contents', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('page_contents')
+      .select('*')
+      .order('page_name', { ascending: true });
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get single page content by slug
+app.get('/api/page-content/:slug', async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const { data, error } = await supabaseAdmin
+      .from('page_contents')
+      .select('*')
+      .eq('page_slug', slug)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') throw error;
+    res.status(200).json({ success: true, data: data || null });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Create or update page content
+app.post('/api/page-content', async (req, res) => {
+  try {
+    const { page_slug, page_name, hero_title, hero_subtitle, hero_image, 
+            content, cta_title, cta_text, cta_button_text, cta_button_link,
+            sections, meta_title, meta_description, meta_keywords } = req.body;
+    
+    // Check if exists
+    const { data: existing } = await supabaseAdmin
+      .from('page_contents')
+      .select('id')
+      .eq('page_slug', page_slug)
+      .single();
+    
+    let result;
+    if (existing) {
+      // Update
+      result = await supabaseAdmin
+        .from('page_contents')
+        .update({
+          page_name, hero_title, hero_subtitle, hero_image, content,
+          cta_title, cta_text, cta_button_text, cta_button_link,
+          sections, meta_title, meta_description, meta_keywords,
+          updated_at: new Date()
+        })
+        .eq('page_slug', page_slug)
+        .select();
+    } else {
+      // Insert
+      result = await supabaseAdmin
+        .from('page_contents')
+        .insert([{
+          page_slug, page_name, hero_title, hero_subtitle, hero_image,
+          content, cta_title, cta_text, cta_button_text, cta_button_link,
+          sections, meta_title, meta_description, meta_keywords
+        }])
+        .select();
+    }
+    
+    if (result.error) throw result.error;
+    res.status(200).json({ success: true, data: result.data });
+  } catch (error) {
+    console.error('Error saving page content:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Delete page content
+app.delete('/api/page-content/:slug', async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const { error } = await supabaseAdmin
+      .from('page_contents')
+      .delete()
+      .eq('page_slug', slug);
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, message: 'Page content deleted' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get specialty page content
+app.get('/api/specialty-content/:specialtyId', async (req, res) => {
+  try {
+    const { specialtyId } = req.params;
+    const { data, error } = await supabaseAdmin
+      .from('specialties_content')
+      .select('*')
+      .eq('specialty_id', specialtyId)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') throw error;
+    res.status(200).json({ success: true, data: data || null });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Update specialty page content
+app.post('/api/specialty-content', async (req, res) => {
+  try {
+    const { specialty_id, hero_title, hero_subtitle, overview, key_benefits, faqs, meta_title, meta_description } = req.body;
+    
+    const { data: existing } = await supabaseAdmin
+      .from('specialties_content')
+      .select('id')
+      .eq('specialty_id', specialty_id)
+      .single();
+    
+    let result;
+    if (existing) {
+      result = await supabaseAdmin
+        .from('specialties_content')
+        .update({ hero_title, hero_subtitle, overview, key_benefits, faqs, meta_title, meta_description, updated_at: new Date() })
+        .eq('specialty_id', specialty_id)
+        .select();
+    } else {
+      result = await supabaseAdmin
+        .from('specialties_content')
+        .insert([{ specialty_id, hero_title, hero_subtitle, overview, key_benefits, faqs, meta_title, meta_description }])
+        .select();
+    }
+    
+    if (result.error) throw result.error;
+    res.status(200).json({ success: true, data: result.data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+// ============================================
+// DYNAMIC PAGES ENDPOINTS
+// ============================================
+
+// Get all dynamic pages (with optional type filter)
+app.get('/api/dynamic-pages', async (req, res) => {
+  try {
+    const { type } = req.query;
+    let query = supabaseAdmin
+      .from('dynamic_pages')
+      .select('*')
+      .eq('is_active', true);
+    
+    if (type) {
+      query = query.eq('page_type', type);
+    }
+    
+    const { data, error } = await query.order('page_title');
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error fetching dynamic pages:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get single dynamic page by type and slug
+app.get('/api/dynamic-page/:type/:slug', async (req, res) => {
+  try {
+    const { type, slug } = req.params;
+    
+    const { data, error } = await supabaseAdmin
+      .from('dynamic_pages')
+      .select('*')
+      .eq('page_type', type)
+      .eq('slug', slug)
+      .eq('is_active', true)
+      .single();
+    
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return res.status(404).json({ success: false, error: 'Page not found' });
+      }
+      throw error;
+    }
+    
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error fetching dynamic page:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Create or update dynamic page (admin only)
+app.post('/api/dynamic-page', async (req, res) => {
+  try {
+    const { 
+      id, page_type, slug, page_title, hero_title, hero_subtitle, 
+      main_title, content, stats, features, items_list, process_steps,
+      form_title, form_subtitle, button_text, footer_note,
+      cta_title, cta_text, cta_button, cta_link, meta_title, meta_description 
+    } = req.body;
+    
+    let result;
+    
+    if (id) {
+      // Update existing page
+      result = await supabaseAdmin
+        .from('dynamic_pages')
+        .update({
+          page_title, hero_title, hero_subtitle, main_title, content,
+          stats, features, items_list, process_steps,
+          form_title, form_subtitle, button_text, footer_note,
+          cta_title, cta_text, cta_button, cta_link,
+          meta_title, meta_description,
+          updated_at: new Date()
+        })
+        .eq('id', id)
+        .select();
+    } else {
+      // Create new page
+      result = await supabaseAdmin
+        .from('dynamic_pages')
+        .insert([{
+          page_type, slug, page_title, hero_title, hero_subtitle,
+          main_title, content, stats, features, items_list, process_steps,
+          form_title, form_subtitle, button_text, footer_note,
+          cta_title, cta_text, cta_button, cta_link,
+          meta_title, meta_description,
+          is_active: true,
+          created_at: new Date(),
+          updated_at: new Date()
+        }])
+        .select();
+    }
+    
+    if (result.error) throw result.error;
+    res.status(200).json({ success: true, data: result.data });
+  } catch (error) {
+    console.error('Error saving dynamic page:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Delete dynamic page (admin only)
+app.delete('/api/dynamic-page/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const { error } = await supabaseAdmin
+      .from('dynamic_pages')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, message: 'Page deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting dynamic page:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Toggle page active status (admin only)
+app.patch('/api/dynamic-page/:id/toggle', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { is_active } = req.body;
+    
+    const { data, error } = await supabaseAdmin
+      .from('dynamic_pages')
+      .update({ is_active, updated_at: new Date() })
+      .eq('id', id)
+      .select();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error toggling page status:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get page types summary (for admin dashboard)
+app.get('/api/dynamic-pages/summary', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('dynamic_pages')
+      .select('page_type, is_active')
+      .eq('is_active', true);
+    
+    if (error) throw error;
+    
+    const summary = {
+      services: data.filter(p => p.page_type === 'services').length,
+      specialties: data.filter(p => p.page_type === 'specialties').length,
+      payers: data.filter(p => p.page_type === 'payers').length,
+      ehr: data.filter(p => p.page_type === 'ehr').length,
+      total: data.length
+    };
+    
+    res.status(200).json({ success: true, data: summary });
+  } catch (error) {
+    console.error('Error fetching summary:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 // CRITICAL: Export for Vercel
 module.exports = app;

@@ -16,42 +16,21 @@ import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import Pricing from './pages/Pricing';
 import CaseStudies from './pages/CaseStudies';
-import MedicalCoding from './pages/services/MedicalCoding';
-import ARManagement from './pages/services/ARManagement';
-import Credentialing from './pages/services/Credentialing';
-import Cardiology from './pages/specialties/Cardiology';
-import Orthopedics from './pages/specialties/Orthopedics';
-import Neurology from './pages/specialties/Neurology';
-import PrimaryCare from './pages/specialties/PrimaryCare';
-import Pediatrics from './pages/specialties/Pediatrics';
-import Ophthalmology from './pages/specialties/Ophthalmology';
-import Dermatology from './pages/specialties/Dermatology';
-import Urology from './pages/specialties/Urology';
-import Gastroenterology from './pages/specialties/Gastroenterology';
-import Oncology from './pages/specialties/Oncology';
-import Radiology from './pages/specialties/Radiology';
-import Anesthesiology from './pages/specialties/Anesthesiology';
-import Psychiatry from './pages/specialties/Psychiatry';
-import Pulmonology from './pages/specialties/Pulmonology';
-import Nephrology from './pages/specialties/Nephrology';
-import Medicare from './pages/payers/Medicare';
-import Medicaid from './pages/payers/Medicaid';
-import BlueCross from './pages/payers/BlueCross';
-import UnitedHealthcare from './pages/payers/UnitedHealthcare';
-import Aetna from './pages/payers/Aetna';
-import Cigna from './pages/payers/Cigna';
-import Humana from './pages/payers/Humana';
-import Tricare from './pages/payers/Tricare';
-import WorkersComp from './pages/payers/WorkersComp';
-import CommercialInsurance from './pages/payers/CommercialInsurance';
-import Epic from './pages/ehr/Epic';
-import Cerner from './pages/ehr/Cerner';
-import EClinicalWorks from './pages/ehr/EClinicalWorks';
-import Athenahealth from './pages/ehr/Athenahealth';
-import NextGen from './pages/ehr/NextGen';
-import Kareo from './pages/ehr/Kareo';
-import PracticeFusion from './pages/ehr/PracticeFusion';
-import Allscripts from './pages/ehr/Allscripts';
+
+// NEW: Dynamic page component (replaces all individual service/specialty/payer/ehr pages)
+import DynamicPage from './pages/DynamicPage';
+
+// Keep these listing pages (they show all items, not individual pages)
+import Payers from './pages/Payers';
+import Specialties from './pages/Specialties';
+import Resources from './pages/Resources';
+
+// Keep these static pages (unique layouts that don't fit the dynamic pattern)
+import AISolutions from './pages/ai/AISolutions';
+import RCMSoftware from './pages/software/RCMSoftware';
+import RCMServices from './pages/automation/RCMServices';
+import Events from './pages/resources/Events';
+import Magazine from './pages/resources/Magazine';
 import Whitepapers from './pages/resources/Whitepapers';
 import Webinars from './pages/resources/Webinars';
 import FAQs from './pages/resources/FAQs';
@@ -66,16 +45,7 @@ import ForMedicalGroups from './pages/audience/ForMedicalGroups';
 import ForIndependentPractices from './pages/audience/ForIndependentPractices';
 import ForInHouseTeams from './pages/audience/ForInHouseTeams';
 import ChatBot from './components/ChatBot';
-import AISolutions from './pages/ai/AISolutions';
-import RCMSoftware from './pages/software/RCMSoftware';
-import RCMServices from './pages/automation/RCMServices';
-import Events from './pages/resources/Events';
-import Magazine from './pages/resources/Magazine';
-import Payers from './pages/Payers';
-import Specialties from './pages/Specialties';
-import Resources from './pages/Resources';
 
-// Create a separate component for the main app content that uses useLocation
 const AppContent = () => {
   const location = useLocation();
 
@@ -88,6 +58,7 @@ const AppContent = () => {
       <Navbar />
       <main className="flex-grow">
         <Routes>
+          {/* Main pages */}
           <Route path="/" element={<Home />} />
           <Route path="/services" element={<Services />} />
           <Route path="/blog" element={<Blog />} />
@@ -98,45 +69,31 @@ const AppContent = () => {
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/case-studies" element={<CaseStudies />} />
-          <Route path="/services/coding" element={<MedicalCoding />} />
-          <Route path="/services/ar-management" element={<ARManagement />} />
-          <Route path="/services/credentialing" element={<Credentialing />} />
-          <Route path="/services/rcm" element={<Services />} />
-          <Route path="/services/denial-management" element={<Services />} />
-          <Route path="/services/telehealth" element={<Services />} />
-          <Route path="/specialties/cardiology" element={<Cardiology />} />
-          <Route path="/specialties/orthopedics" element={<Orthopedics />} />
-          <Route path="/specialties/neurology" element={<Neurology />} />
-          <Route path="/specialties/primary-care" element={<PrimaryCare />} />
-          <Route path="/specialties/pediatrics" element={<Pediatrics />} />
-          <Route path="/specialties/ophthalmology" element={<Ophthalmology />} />
-          <Route path="/specialties/dermatology" element={<Dermatology />} />
-          <Route path="/specialties/urology" element={<Urology />} />
-          <Route path="/specialties/gastroenterology" element={<Gastroenterology />} />
-          <Route path="/specialties/oncology" element={<Oncology />} />
-          <Route path="/specialties/radiology" element={<Radiology />} />
-          <Route path="/specialties/anesthesiology" element={<Anesthesiology />} />
-          <Route path="/specialties/psychiatry" element={<Psychiatry />} />
-          <Route path="/specialties/pulmonology" element={<Pulmonology />} />
-          <Route path="/specialties/nephrology" element={<Nephrology />} />
-          <Route path="/payers/medicare" element={<Medicare />} />
-          <Route path="/payers/medicaid" element={<Medicaid />} />
-          <Route path="/payers/blue-cross" element={<BlueCross />} />
-          <Route path="/payers/united-healthcare" element={<UnitedHealthcare />} />
-          <Route path="/payers/aetna" element={<Aetna />} />
-          <Route path="/payers/cigna" element={<Cigna />} />
-          <Route path="/payers/humana" element={<Humana />} />
-          <Route path="/payers/tricare" element={<Tricare />} />
-          <Route path="/payers/workers-comp" element={<WorkersComp />} />
-          <Route path="/payers/commercial" element={<CommercialInsurance />} />
-          <Route path="/ehr/epic" element={<Epic />} />
-          <Route path="/ehr/cerner" element={<Cerner />} />
-          <Route path="/ehr/eclinicalworks" element={<EClinicalWorks />} />
-          <Route path="/ehr/athenahealth" element={<Athenahealth />} />
-          <Route path="/ehr/nextgen" element={<NextGen />} />
-          <Route path="/ehr/kareo" element={<Kareo />} />
-          <Route path="/ehr/practice-fusion" element={<PracticeFusion />} />
-          <Route path="/ehr/allscripts" element={<Allscripts />} />
+          
+          {/* Listing pages */}
+          <Route path="/payers" element={<Payers />} />
+          <Route path="/specialties" element={<Specialties />} />
+          <Route path="/resources" element={<Resources />} />
+          
+          {/* DYNAMIC ROUTES - These replace 50+ individual page routes */}
+          {/* Services dynamic pages: /services/coding, /services/ar-management, /services/credentialing */}
+          <Route path="/services/:slug" element={<DynamicPage />} />
+          
+          {/* Specialties dynamic pages: /specialties/cardiology, /specialties/orthopedics, etc. */}
+          <Route path="/specialties/:slug" element={<DynamicPage />} />
+          
+          {/* Payers dynamic pages: /payers/medicare, /payers/medicaid, etc. */}
+          <Route path="/payers/:slug" element={<DynamicPage />} />
+          
+          {/* EHR dynamic pages: /ehr/epic, /ehr/cerner, etc. */}
+          <Route path="/ehr/:slug" element={<DynamicPage />} />
+          
+          {/* Static unique pages (keep as-is) */}
+          <Route path="/ai-solutions" element={<AISolutions />} />
+          <Route path="/rcm-software" element={<RCMSoftware />} />
+          <Route path="/rcm-automation" element={<RCMServices />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/magazine" element={<Magazine />} />
           <Route path="/resources/whitepapers" element={<Whitepapers />} />
           <Route path="/resources/webinars" element={<Webinars />} />
           <Route path="/resources/faqs" element={<FAQs />} />
@@ -150,14 +107,9 @@ const AppContent = () => {
           <Route path="/for-medical-groups" element={<ForMedicalGroups />} />
           <Route path="/for-independent-practices" element={<ForIndependentPractices />} />
           <Route path="/for-in-house-teams" element={<ForInHouseTeams />} />
-          <Route path="/payers" element={<Payers />} />
-          <Route path="/specialties" element={<Specialties />} />
-          <Route path="/resources" element={<Resources />} />
-          <Route path="/ai-solutions" element={<AISolutions />} />
-          <Route path="/rcm-software" element={<RCMSoftware />} />
-          <Route path="/rcm-automation" element={<RCMServices />} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/magazine" element={<Magazine />} />
+          
+          {/* Fallback route for any other dynamic pages */}
+          <Route path="/:type/:slug" element={<DynamicPage />} />
         </Routes>
       </main>
       <Footer />
@@ -167,7 +119,6 @@ const AppContent = () => {
   );
 };
 
-// Main App component with Router
 function App() {
   return (
     <Router>
