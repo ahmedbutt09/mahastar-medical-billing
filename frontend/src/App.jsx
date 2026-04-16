@@ -1,6 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { trackPageView } from './utils/analytics';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
@@ -74,7 +77,13 @@ import Events from './pages/resources/Events';
 import Magazine from './pages/resources/Magazine';
 
 function App() {
+  const location = useLocation();
+
+useEffect(() => {
+  trackPageView(location.pathname);
+}, [location]);
   return (
+    
     <Router>
       <ScrollToTop />
       <div className="min-h-screen flex flex-col">

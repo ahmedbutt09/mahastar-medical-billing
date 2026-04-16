@@ -692,6 +692,590 @@ if (process.env.NODE_ENV !== 'production') {
     console.log(`🚀 Server running on port ${PORT}`);
   });
 }
+// ============= CHAT CALLBACK ENDPOINTS =============
 
+// Submit chat callback request
+app.post('/api/chat/callback', async (req, res) => {
+  try {
+    const { name, email, phone, message } = req.body;
+    
+    if (!name || !email) {
+      return res.status(400).json({ success: false, error: 'Name and email are required' });
+    }
+    
+    const { data, error } = await supabaseAdmin
+      .from('chat_callbacks')
+      .insert([{ name, email, phone, message, status: 'pending', created_at: new Date() }])
+      .select();
+    
+    if (error) throw error;
+    
+    // Send email notification
+    if (process.env.SENDGRID_API_KEY) {
+      try {
+        const msg = {
+          to: 'support@mahastar.com',
+          from: process.env.SENDGRID_FROM_EMAIL || 'info@mahastar.com',
+          subject: 'New Chat Callback Request',
+          html: `<h3>New Chat Callback Request</h3>
+                 <p><strong>Name:</strong> ${name}</p>
+                 <p><strong>Email:</strong> ${email}</p>
+                 <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
+                 <p><strong>Message:</strong> ${message || 'Not provided'}</p>
+                 <p><small>Submitted on: ${new Date().toLocaleString()}</small></p>`
+        };
+        await sgMail.send(msg);
+      } catch (emailError) {
+        console.error('Email notification error:', emailError);
+      }
+    }
+    
+    res.status(200).json({ success: true, message: 'Callback request submitted' });
+  } catch (error) {
+    console.error('Chat callback error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get all chat callbacks (admin)
+app.get('/api/chat/callbacks', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('chat_callbacks')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Update chat callback status
+app.put('/api/chat/callbacks/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    const { data, error } = await supabaseAdmin
+      .from('chat_callbacks')
+      .update({ status, updated_at: new Date() })
+      .eq('id', id)
+      .select();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ============= CASE STUDIES ENDPOINTS =============
+
+// Get all case studies
+app.get('/api/case-studies', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('case_studies')
+      .select('*')
+      .eq('status', 'published')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get single case study by ID
+app.get('/api/case-studies/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabaseAdmin
+      .from('case_studies')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Create case study (admin)
+app.post('/api/case-studies', async (req, res) => {
+  try {
+    const { title, specialty, challenge, solution, results, quote, author, image_url } = req.body;
+    
+    const { data, error } = await supabaseAdmin
+      .from('case_studies')
+      .insert([{ 
+        title, 
+        specialty, 
+        challenge, 
+        solution, 
+        results: results || [], 
+        quote, 
+        author, 
+        image_url, 
+        status: 'published',
+        created_at: new Date() 
+      }])
+      .select();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Delete case study (admin)
+app.delete('/api/case-studies/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { error } = await supabaseAdmin
+      .from('case_studies')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, message: 'Case study deleted' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ============= SPECIALTIES ENDPOINTS =============
+
+// Get all specialties
+app.get('/api/specialties', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('specialties')
+      .select('*')
+      .eq('status', 'active')
+      .order('name');
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get single specialty by slug
+app.get('/api/specialties/:slug', async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const { data, error } = await supabaseAdmin
+      .from('specialties')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Create specialty (admin)
+app.post('/api/specialties', async (req, res) => {
+  try {
+    const { name, slug, description, icon, recovery_rate, avg_claim_value, providers_served } = req.body;
+    
+    const { data, error } = await supabaseAdmin
+      .from('specialties')
+      .insert([{ name, slug, description, icon, recovery_rate, avg_claim_value, providers_served, status: 'active' }])
+      .select();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ============= EHR INTEGRATIONS ENDPOINTS =============
+
+// Get all EHR integrations
+app.get('/api/ehr-integrations', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('ehr_integrations')
+      .select('*')
+      .eq('status', 'active')
+      .order('name');
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get single EHR integration by slug
+app.get('/api/ehr-integrations/:slug', async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const { data, error } = await supabaseAdmin
+      .from('ehr_integrations')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ============= PAYERS ENDPOINTS =============
+
+// Get all payers
+app.get('/api/payers', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('payers')
+      .select('*')
+      .eq('status', 'active')
+      .order('name');
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get single payer by slug
+app.get('/api/payers/:slug', async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const { data, error } = await supabaseAdmin
+      .from('payers')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ============= AI SOLUTIONS ENDPOINTS =============
+
+// Get all AI solutions
+app.get('/api/ai-solutions', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('ai_solutions')
+      .select('*')
+      .eq('status', 'active')
+      .order('name');
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get single AI solution by slug
+app.get('/api/ai-solutions/:slug', async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const { data, error } = await supabaseAdmin
+      .from('ai_solutions')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ============= RCM SOFTWARE ENDPOINTS =============
+
+// Get all RCM software
+app.get('/api/rcm-software', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('rcm_software')
+      .select('*')
+      .eq('status', 'active')
+      .order('name');
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get single RCM software by slug
+app.get('/api/rcm-software/:slug', async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const { data, error } = await supabaseAdmin
+      .from('rcm_software')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ============= EVENTS ENDPOINTS =============
+
+// Get all events
+app.get('/api/events', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('events')
+      .select('*')
+      .order('date', { ascending: true });
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get upcoming events only
+app.get('/api/events/upcoming', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('events')
+      .select('*')
+      .eq('status', 'upcoming')
+      .gte('date', new Date().toISOString().split('T')[0])
+      .order('date', { ascending: true });
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Create event (admin)
+app.post('/api/events', async (req, res) => {
+  try {
+    const { title, date, location, type, description, registration_link } = req.body;
+    
+    const { data, error } = await supabaseAdmin
+      .from('events')
+      .insert([{ title, date, location, type, description, registration_link, status: 'upcoming' }])
+      .select();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ============= MAGAZINE ISSUES ENDPOINTS =============
+
+// Get all magazine issues
+app.get('/api/magazine', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('magazine_issues')
+      .select('*')
+      .eq('status', 'published')
+      .order('published_date', { ascending: false });
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get single magazine issue
+app.get('/api/magazine/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabaseAdmin
+      .from('magazine_issues')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ============= PAGE VIEW ANALYTICS =============
+
+// Track page view
+app.post('/api/page-view', async (req, res) => {
+  try {
+    const { page_url, visitor_ip, user_agent } = req.body;
+    
+    await supabaseAdmin
+      .from('page_views')
+      .insert([{ page_url, visitor_ip, user_agent, viewed_at: new Date() }]);
+    
+    res.status(200).json({ success: true });
+  } catch (error) {
+    // Don't fail if analytics fails
+    console.error('Page view tracking error:', error);
+    res.status(200).json({ success: true });
+  }
+});
+
+// Get page view stats (admin only - should add auth check)
+app.get('/api/analytics/page-views', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('page_views')
+      .select('*')
+      .order('viewed_at', { ascending: false })
+      .limit(5000);
+    
+    if (error) throw error;
+    
+    // Aggregate stats
+    const totalViews = data.length;
+    const uniquePages = [...new Set(data.map(v => v.page_url || 'home'))];
+    const viewsByPage = {};
+    const viewsByDay = {};
+    
+    data.forEach(v => {
+      const page = v.page_url || 'home';
+      viewsByPage[page] = (viewsByPage[page] || 0) + 1;
+      
+      const day = v.viewed_at?.split('T')[0];
+      if (day) {
+        viewsByDay[day] = (viewsByDay[day] || 0) + 1;
+      }
+    });
+    
+    res.status(200).json({ 
+      success: true, 
+      totalViews, 
+      uniquePages: uniquePages.length,
+      viewsByPage,
+      viewsByDay,
+      recentViews: data.slice(0, 100)
+    });
+  } catch (error) {
+    console.error('Analytics error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ============= NEWSLETTER SEND (Enhanced) =============
+
+// Get newsletter subscribers with pagination
+app.get('/api/newsletter/subscribers', async (req, res) => {
+  try {
+    const { page = 1, limit = 100 } = req.query;
+    const offset = (page - 1) * limit;
+    
+    const { data, error, count } = await supabaseAdmin
+      .from('newsletter')
+      .select('*', { count: 'exact' })
+      .order('subscribed_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data, total: count, page, limit });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Bulk delete subscribers
+app.delete('/api/newsletter/bulk-delete', async (req, res) => {
+  try {
+    const { ids } = req.body;
+    
+    if (!ids || !ids.length) {
+      return res.status(400).json({ success: false, error: 'No IDs provided' });
+    }
+    
+    const { error } = await supabaseAdmin
+      .from('newsletter')
+      .delete()
+      .in('id', ids);
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, message: `${ids.length} subscribers removed` });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ============= DASHBOARD STATS (Admin) =============
+
+// Get comprehensive dashboard stats
+app.get('/api/admin/stats', async (req, res) => {
+  try {
+    // Get counts from various tables
+    const [
+      contactsCount,
+      pendingContactsCount,
+      subscribersCount,
+      chatCallbacksCount,
+      pendingChatCallbacksCount,
+      caseStudiesCount,
+      specialtiesCount,
+      eventsCount,
+      pageViewsCount
+    ] = await Promise.all([
+      supabaseAdmin.from('contacts').select('*', { count: 'exact', head: true }),
+      supabaseAdmin.from('contacts').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+      supabaseAdmin.from('newsletter').select('*', { count: 'exact', head: true }),
+      supabaseAdmin.from('chat_callbacks').select('*', { count: 'exact', head: true }),
+      supabaseAdmin.from('chat_callbacks').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+      supabaseAdmin.from('case_studies').select('*', { count: 'exact', head: true }),
+      supabaseAdmin.from('specialties').select('*', { count: 'exact', head: true }).eq('status', 'active'),
+      supabaseAdmin.from('events').select('*', { count: 'exact', head: true }).eq('status', 'upcoming'),
+      supabaseAdmin.from('page_views').select('*', { count: 'exact', head: true })
+    ]);
+    
+    res.status(200).json({
+      success: true,
+      stats: {
+        totalContacts: contactsCount.count || 0,
+        pendingContacts: pendingContactsCount.count || 0,
+        totalSubscribers: subscribersCount.count || 0,
+        totalChatCallbacks: chatCallbacksCount.count || 0,
+        pendingChatCallbacks: pendingChatCallbacksCount.count || 0,
+        totalCaseStudies: caseStudiesCount.count || 0,
+        activeSpecialties: specialtiesCount.count || 0,
+        upcomingEvents: eventsCount.count || 0,
+        totalPageViews: pageViewsCount.count || 0
+      }
+    });
+  } catch (error) {
+    console.error('Stats error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 // CRITICAL: Export for Vercel
 module.exports = app;
