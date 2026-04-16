@@ -75,7 +75,9 @@ import RCMServices from './pages/automation/RCMServices';
 // Additional Resource Pages
 import Events from './pages/resources/Events';
 import Magazine from './pages/resources/Magazine';
-
+import Payers from './pages/Payers';
+import Specialties from './pages/Specialties';
+import Resources from './pages/Resources';
 function App() {
   const location = useLocation();
 
@@ -152,7 +154,9 @@ useEffect(() => {
 <Route path="/for-medical-groups" element={<ForMedicalGroups />} />
 <Route path="/for-independent-practices" element={<ForIndependentPractices />} />
 <Route path="/for-in-house-teams" element={<ForInHouseTeams />} />
-
+<Route path="/payers" element={<Payers />} />
+<Route path="/specialties" element={<Specialties />} />
+<Route path="/resources" element={<Resources />} />
 {/* AI & Software Routes */}
 <Route path="/ai-solutions" element={<AISolutions />} />
 <Route path="/rcm-software" element={<RCMSoftware />} />
