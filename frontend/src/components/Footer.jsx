@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Phone } from 'lucide-react';
+import { Mail, Phone, Shield, Lock, CheckCircle, Award } from 'lucide-react';
 import { FaFacebook, FaTwitter, FaLinkedin } from 'react-icons/fa';
-// 1. Import your custom api instance
-import api from '../api'; 
+import api from '../api';
 import toast from 'react-hot-toast';
 
 const Footer = () => {
@@ -19,7 +18,6 @@ const Footer = () => {
     
     setSubscribing(true);
     try {
-      // 2. Use api.post and ensured endpoint consistency
       await api.post('/api/newsletter', { email });
       toast.success('Subscribed successfully!');
       setEmail('');
@@ -50,6 +48,8 @@ const Footer = () => {
             <ul className="space-y-2">
               <li><Link to="/" className="text-gray-300 hover:text-white transition">Home</Link></li>
               <li><Link to="/services" className="text-gray-300 hover:text-white transition">Services</Link></li>
+              <li><Link to="/pricing" className="text-gray-300 hover:text-white transition">Pricing</Link></li>
+              <li><Link to="/case-studies" className="text-gray-300 hover:text-white transition">Case Studies</Link></li>
               <li><Link to="/blog" className="text-gray-300 hover:text-white transition">Blog</Link></li>
               <li><Link to="/about" className="text-gray-300 hover:text-white transition">About</Link></li>
               <li><Link to="/contact" className="text-gray-300 hover:text-white transition">Contact</Link></li>
@@ -103,10 +103,32 @@ const Footer = () => {
             </div>
           </div>
         </div>
+
+        {/* Compliance Badges - NEW SECTION */}
+        <div className="border-t border-gray-700 pt-6 mb-6">
+          <div className="flex flex-wrap justify-center gap-6">
+            <div className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-accent" />
+              <span className="text-xs text-gray-300">HIPAA Compliant</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Lock className="w-5 h-5 text-accent" />
+              <span className="text-xs text-gray-300">SOC2 Type II</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-accent" />
+              <span className="text-xs text-gray-300">VAPT Audited</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Award className="w-5 h-5 text-accent" />
+              <span className="text-xs text-gray-300">20+ Years Experience</span>
+            </div>
+          </div>
+        </div>
         
         <div className="border-t border-gray-700 pt-6 text-center">
           <p className="text-gray-300">
-            &copy; 2024 MahaStar Medical Billing & IT Solutions LLC. All rights reserved.
+            &copy; 2025 MahaStar Medical Billing & IT Solutions LLC. All rights reserved.
           </p>
         </div>
       </div>
