@@ -59,6 +59,19 @@ import CodingUpdates2025 from './pages/resources/CodingUpdates2025';
 import Leadership from './pages/company/Leadership';
 import Careers from './pages/company/Careers';
 import PrivacyPolicy from './pages/company/PrivacyPolicy';
+import ForHospitals from './pages/audience/ForHospitals';
+import ForMedicalGroups from './pages/audience/ForMedicalGroups';
+import ForIndependentPractices from './pages/audience/ForIndependentPractices';
+import ForInHouseTeams from './pages/audience/ForInHouseTeams';
+import ChatBot from './components/ChatBot';
+// AI & Software Pages
+import AISolutions from './pages/ai/AISolutions';
+import RCMSoftware from './pages/software/RCMSoftware';
+import RCMServices from './pages/automation/RCMServices';
+
+// Additional Resource Pages
+import Events from './pages/resources/Events';
+import Magazine from './pages/resources/Magazine';
 
 function App() {
   return (
@@ -126,10 +139,25 @@ function App() {
             <Route path="/company/leadership" element={<Leadership />} />
             <Route path="/company/careers" element={<Careers />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/for-hospitals" element={<ForHospitals />} />
+<Route path="/for-medical-groups" element={<ForMedicalGroups />} />
+<Route path="/for-independent-practices" element={<ForIndependentPractices />} />
+<Route path="/for-in-house-teams" element={<ForInHouseTeams />} />
+
+{/* AI & Software Routes */}
+<Route path="/ai-solutions" element={<AISolutions />} />
+<Route path="/rcm-software" element={<RCMSoftware />} />
+<Route path="/rcm-automation" element={<RCMServices />} />
+
+{/* Additional Resource Routes */}
+<Route path="/events" element={<Events />} />
+<Route path="/magazine" element={<Magazine />} />
+
           </Routes>
         </main>
         <Footer />
         <Toaster position="top-right" />
+<ChatBot />
       </div>
     </Router>
   );
