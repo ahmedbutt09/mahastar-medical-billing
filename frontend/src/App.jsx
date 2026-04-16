@@ -1,8 +1,7 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
 import { trackPageView } from './utils/analytics';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -67,111 +66,113 @@ import ForMedicalGroups from './pages/audience/ForMedicalGroups';
 import ForIndependentPractices from './pages/audience/ForIndependentPractices';
 import ForInHouseTeams from './pages/audience/ForInHouseTeams';
 import ChatBot from './components/ChatBot';
-// AI & Software Pages
 import AISolutions from './pages/ai/AISolutions';
 import RCMSoftware from './pages/software/RCMSoftware';
 import RCMServices from './pages/automation/RCMServices';
-
-// Additional Resource Pages
 import Events from './pages/resources/Events';
 import Magazine from './pages/resources/Magazine';
 import Payers from './pages/Payers';
 import Specialties from './pages/Specialties';
 import Resources from './pages/Resources';
-function App() {
+
+// Create a separate component for the main app content that uses useLocation
+const AppContent = () => {
   const location = useLocation();
 
-useEffect(() => {
-  trackPageView(location.pathname);
-}, [location]);
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location]);
+
   return (
-    
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <main className="flex-grow">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/case-studies" element={<CaseStudies />} />
+          <Route path="/services/coding" element={<MedicalCoding />} />
+          <Route path="/services/ar-management" element={<ARManagement />} />
+          <Route path="/services/credentialing" element={<Credentialing />} />
+          <Route path="/services/rcm" element={<Services />} />
+          <Route path="/services/denial-management" element={<Services />} />
+          <Route path="/services/telehealth" element={<Services />} />
+          <Route path="/specialties/cardiology" element={<Cardiology />} />
+          <Route path="/specialties/orthopedics" element={<Orthopedics />} />
+          <Route path="/specialties/neurology" element={<Neurology />} />
+          <Route path="/specialties/primary-care" element={<PrimaryCare />} />
+          <Route path="/specialties/pediatrics" element={<Pediatrics />} />
+          <Route path="/specialties/ophthalmology" element={<Ophthalmology />} />
+          <Route path="/specialties/dermatology" element={<Dermatology />} />
+          <Route path="/specialties/urology" element={<Urology />} />
+          <Route path="/specialties/gastroenterology" element={<Gastroenterology />} />
+          <Route path="/specialties/oncology" element={<Oncology />} />
+          <Route path="/specialties/radiology" element={<Radiology />} />
+          <Route path="/specialties/anesthesiology" element={<Anesthesiology />} />
+          <Route path="/specialties/psychiatry" element={<Psychiatry />} />
+          <Route path="/specialties/pulmonology" element={<Pulmonology />} />
+          <Route path="/specialties/nephrology" element={<Nephrology />} />
+          <Route path="/payers/medicare" element={<Medicare />} />
+          <Route path="/payers/medicaid" element={<Medicaid />} />
+          <Route path="/payers/blue-cross" element={<BlueCross />} />
+          <Route path="/payers/united-healthcare" element={<UnitedHealthcare />} />
+          <Route path="/payers/aetna" element={<Aetna />} />
+          <Route path="/payers/cigna" element={<Cigna />} />
+          <Route path="/payers/humana" element={<Humana />} />
+          <Route path="/payers/tricare" element={<Tricare />} />
+          <Route path="/payers/workers-comp" element={<WorkersComp />} />
+          <Route path="/payers/commercial" element={<CommercialInsurance />} />
+          <Route path="/ehr/epic" element={<Epic />} />
+          <Route path="/ehr/cerner" element={<Cerner />} />
+          <Route path="/ehr/eclinicalworks" element={<EClinicalWorks />} />
+          <Route path="/ehr/athenahealth" element={<Athenahealth />} />
+          <Route path="/ehr/nextgen" element={<NextGen />} />
+          <Route path="/ehr/kareo" element={<Kareo />} />
+          <Route path="/ehr/practice-fusion" element={<PracticeFusion />} />
+          <Route path="/ehr/allscripts" element={<Allscripts />} />
+          <Route path="/resources/whitepapers" element={<Whitepapers />} />
+          <Route path="/resources/webinars" element={<Webinars />} />
+          <Route path="/resources/faqs" element={<FAQs />} />
+          <Route path="/resources/glossary" element={<RCMGlossary />} />
+          <Route path="/resources/hipaa-guide" element={<HIPAAComplianceGuide />} />
+          <Route path="/resources/coding-updates" element={<CodingUpdates2025 />} />
+          <Route path="/company/leadership" element={<Leadership />} />
+          <Route path="/company/careers" element={<Careers />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/for-hospitals" element={<ForHospitals />} />
+          <Route path="/for-medical-groups" element={<ForMedicalGroups />} />
+          <Route path="/for-independent-practices" element={<ForIndependentPractices />} />
+          <Route path="/for-in-house-teams" element={<ForInHouseTeams />} />
+          <Route path="/payers" element={<Payers />} />
+          <Route path="/specialties" element={<Specialties />} />
+          <Route path="/resources" element={<Resources />} />
+          <Route path="/ai-solutions" element={<AISolutions />} />
+          <Route path="/rcm-software" element={<RCMSoftware />} />
+          <Route path="/rcm-automation" element={<RCMServices />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/magazine" element={<Magazine />} />
+        </Routes>
+      </main>
+      <Footer />
+      <Toaster position="top-right" />
+      <ChatBot />
+    </div>
+  );
+};
+
+// Main App component with Router
+function App() {
+  return (
     <Router>
       <ScrollToTop />
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:slug" element={<BlogPost />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/admin" element={<AdminLogin />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/case-studies" element={<CaseStudies />} />
-            <Route path="/services/coding" element={<MedicalCoding />} />
-            <Route path="/services/ar-management" element={<ARManagement />} />
-            <Route path="/services/credentialing" element={<Credentialing />} />
-            <Route path="/services/rcm" element={<Services />} />
-            <Route path="/services/denial-management" element={<Services />} />
-            <Route path="/services/telehealth" element={<Services />} />
-            <Route path="/specialties/cardiology" element={<Cardiology />} />
-            <Route path="/specialties/orthopedics" element={<Orthopedics />} />
-            <Route path="/specialties/neurology" element={<Neurology />} />
-            <Route path="/specialties/primary-care" element={<PrimaryCare />} />
-            <Route path="/specialties/pediatrics" element={<Pediatrics />} />
-            <Route path="/specialties/ophthalmology" element={<Ophthalmology />} />
-            <Route path="/specialties/dermatology" element={<Dermatology />} />
-            <Route path="/specialties/urology" element={<Urology />} />
-            <Route path="/specialties/gastroenterology" element={<Gastroenterology />} />
-            <Route path="/specialties/oncology" element={<Oncology />} />
-            <Route path="/specialties/radiology" element={<Radiology />} />
-            <Route path="/specialties/anesthesiology" element={<Anesthesiology />} />
-            <Route path="/specialties/psychiatry" element={<Psychiatry />} />
-            <Route path="/specialties/pulmonology" element={<Pulmonology />} />
-            <Route path="/specialties/nephrology" element={<Nephrology />} />
-            <Route path="/payers/medicare" element={<Medicare />} />
-            <Route path="/payers/medicaid" element={<Medicaid />} />
-            <Route path="/payers/blue-cross" element={<BlueCross />} />
-            <Route path="/payers/united-healthcare" element={<UnitedHealthcare />} />
-            <Route path="/payers/aetna" element={<Aetna />} />
-            <Route path="/payers/cigna" element={<Cigna />} />
-            <Route path="/payers/humana" element={<Humana />} />
-            <Route path="/payers/tricare" element={<Tricare />} />
-            <Route path="/payers/workers-comp" element={<WorkersComp />} />
-            <Route path="/payers/commercial" element={<CommercialInsurance />} />
-            <Route path="/ehr/epic" element={<Epic />} />
-            <Route path="/ehr/cerner" element={<Cerner />} />
-            <Route path="/ehr/eclinicalworks" element={<EClinicalWorks />} />
-            <Route path="/ehr/athenahealth" element={<Athenahealth />} />
-            <Route path="/ehr/nextgen" element={<NextGen />} />
-            <Route path="/ehr/kareo" element={<Kareo />} />
-            <Route path="/ehr/practice-fusion" element={<PracticeFusion />} />
-            <Route path="/ehr/allscripts" element={<Allscripts />} />
-            <Route path="/resources/whitepapers" element={<Whitepapers />} />
-            <Route path="/resources/webinars" element={<Webinars />} />
-            <Route path="/resources/faqs" element={<FAQs />} />
-            <Route path="/resources/glossary" element={<RCMGlossary />} />
-            <Route path="/resources/hipaa-guide" element={<HIPAAComplianceGuide />} />
-            <Route path="/resources/coding-updates" element={<CodingUpdates2025 />} />
-            <Route path="/company/leadership" element={<Leadership />} />
-            <Route path="/company/careers" element={<Careers />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/for-hospitals" element={<ForHospitals />} />
-<Route path="/for-medical-groups" element={<ForMedicalGroups />} />
-<Route path="/for-independent-practices" element={<ForIndependentPractices />} />
-<Route path="/for-in-house-teams" element={<ForInHouseTeams />} />
-<Route path="/payers" element={<Payers />} />
-<Route path="/specialties" element={<Specialties />} />
-<Route path="/resources" element={<Resources />} />
-{/* AI & Software Routes */}
-<Route path="/ai-solutions" element={<AISolutions />} />
-<Route path="/rcm-software" element={<RCMSoftware />} />
-<Route path="/rcm-automation" element={<RCMServices />} />
-
-{/* Additional Resource Routes */}
-<Route path="/events" element={<Events />} />
-<Route path="/magazine" element={<Magazine />} />
-
-          </Routes>
-        </main>
-        <Footer />
-        <Toaster position="top-right" />
-<ChatBot />
-      </div>
+      <AppContent />
     </Router>
   );
 }
