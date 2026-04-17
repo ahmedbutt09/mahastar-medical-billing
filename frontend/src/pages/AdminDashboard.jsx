@@ -113,9 +113,12 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Mobile Header - Visible only on mobile */}
-<div className="md:hidden fixed top-0 left-0 right-0 bg-dark text-white z-[60] px-4 py-3 flex items-center justify-between shadow-lg h-16">
+<div className="md:hidden fixed top-0 left-0 right-0 bg-dark text-white z-[70] px-4 py-3 flex items-center justify-between shadow-lg h-16">
   <h1 className="text-lg font-bold">MahaStar Admin</h1>
-  <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 active:bg-white/10 rounded-lg">
+  <button 
+    onClick={() => setSidebarOpen(!sidebarOpen)} 
+    className="p-2 active:bg-white/10 rounded-lg relative z-[80]"
+  >
     {sidebarOpen ? <CloseIcon size={24} /> : <Menu size={24} />}
   </button>
 </div>
@@ -131,18 +134,17 @@ const AdminDashboard = () => {
 
         {/* 3. SIDEBAR - Added h-full and fixed desktop/mobile logic */}
         <aside className={`
-  /* Base styles */
-  fixed md:sticky top-0 left-0 bg-dark text-white transition-transform duration-300
+  /* Mobile: Fixed overlay | Desktop: Sticky sidebar */
+  fixed md:sticky top-0 left-0 z-[60]
   
-  /* Height fix: h-screen ensures it always spans the full viewport height */
-  w-72 h-screen overflow-y-auto shadow-xl
+  /* Transition and Width */
+  w-72 h-screen bg-dark text-white transition-transform duration-300 ease-in-out
   
-  /* Mobile: Stay on top */
-  z-50 
-  ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+  /* Scrolling Logic */
+  overflow-y-auto shadow-xl flex-shrink-0
   
-  /* Desktop: Use sticky to stay locked while the main content scrolls */
-  md:translate-x-0 md:block md:z-10
+  /* Visibility Logic */
+  ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
 `}>
   {/* Mobile Header Spacer */}
   <div className="h-16 md:hidden" /> 
@@ -191,16 +193,14 @@ const AdminDashboard = () => {
         </aside>
 
        {/* Main Content Area */}
-<main className="flex-1 min-h-screen bg-gray-50 flex flex-col min-w-0 ">
+<main className="flex-1 min-w-0 bg-gray-50 flex flex-col">
   
   {/* 1. MOBILE HEADER SPACER 
       This prevents your content from hiding under the fixed "MahaStar Admin" black bar on mobile.
   */}
   <div className="h-16 md:hidden flex-shrink-0" />
-
   {/* 2. SCROLLABLE CONTENT WRAPPER */}
-  <div className="flex-1 overflow-y-auto overflow-x-hidden">
-    
+  <div className="flex-1 overflow-x-hidden">
     <div className="p-4 md:p-8 max-w-7xl mx-auto w-full">
       
       {/* Overview Section */}
