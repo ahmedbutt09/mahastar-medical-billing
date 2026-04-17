@@ -8,7 +8,8 @@ import {
   Check, X, Trash2, RefreshCw, Send, Download, 
   BarChart3, Headphones, Brain, Settings, Calendar as CalendarIcon,
   BookOpen, Shield, Building2, Activity, Zap, Home,
-  DollarSign, HelpCircle, Book, Video, FileQuestion, Layout, Globe, LogOut
+  DollarSign, HelpCircle, Book, Video, FileQuestion, Layout, Globe, LogOut,
+  Briefcase  // Add this line
 } from 'lucide-react';
 
 // Import manager components
