@@ -119,7 +119,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex-shrink-0">
-            <div className="text-2xl font-bold text-primary">MahaStar</div>
+            <div className="text-2xl font-bold text-primary">GoluStar</div>
             <div className="text-xs text-gray-500 hidden sm:block">Medical Billing & IT Solutions</div>
           </Link>
 
