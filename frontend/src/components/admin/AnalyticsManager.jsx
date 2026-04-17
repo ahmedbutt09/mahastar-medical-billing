@@ -101,32 +101,44 @@ const AnalyticsManager = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <div className="flex justify-between items-center flex-wrap gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-dark">Analytics Dashboard</h2>
-            <p className="text-gray-500 text-sm mt-1">Track page views, user engagement, and trends</p>
-          </div>
-          <div className="flex gap-3">
-            <select
-              value={dateRange}
-              onChange={(e) => setDateRange(e.target.value)}
-              className="px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary"
-            >
-              <option value="7">Last 7 days</option>
-              <option value="30">Last 30 days</option>
-              <option value="90">Last 90 days</option>
-              <option value="365">Last year</option>
-            </select>
-            <button onClick={exportAnalytics} className="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-secondary transition">
-              <Download size={16} /> Export CSV
-            </button>
-            <button onClick={fetchAnalytics} className="bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-700 transition">
-              <RefreshCw size={16} /> Refresh
-            </button>
-          </div>
-        </div>
+<div className="bg-white rounded-xl shadow-md p-4 md:p-6">
+  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <div>
+      <h2 className="text-xl md:text-2xl font-bold text-dark">Analytics Dashboard</h2>
+      <p className="text-gray-500 text-sm mt-1">Track page views, user engagement, and trends</p>
+    </div>
+    
+    {/* Buttons Container - Changed to grid for better mobile spacing */}
+    <div className="grid grid-cols-1 sm:flex sm:items-center gap-2 md:gap-3">
+      <select
+        value={dateRange}
+        onChange={(e) => setDateRange(e.target.value)}
+        className="px-3 py-2 border rounded-lg focus:ring-primary focus:border-primary text-sm bg-white"
+      >
+        <option value="7">Last 7 days</option>
+        <option value="30">Last 30 days</option>
+        <option value="90">Last 90 days</option>
+        <option value="365">Last year</option>
+      </select>
+
+      <div className="flex gap-2">
+        <button 
+          onClick={exportAnalytics} 
+          className="flex-1 sm:flex-none bg-primary text-white px-3 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-secondary transition text-sm whitespace-nowrap"
+        >
+          <Download size={16} /> <span className="hidden xs:inline">Export</span> CSV
+        </button>
+        
+        <button 
+          onClick={fetchAnalytics} 
+          className="flex-1 sm:flex-none bg-gray-600 text-white px-3 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-700 transition text-sm whitespace-nowrap"
+        >
+          <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Refresh
+        </button>
       </div>
+    </div>
+  </div>
+</div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -204,25 +216,28 @@ const AnalyticsManager = () => {
         <div className="p-6">
           <div className="space-y-2">
             {Object.entries(analytics?.viewsByDay || {})
-              .sort((a, b) => new Date(b[0]) - new Date(a[0]))
-              .slice(0, 30)
-              .map(([date, views]) => {
-                const maxViews = Math.max(...Object.values(analytics?.viewsByDay || {}));
-                const percentage = (views / maxViews) * 100;
-                return (
-                  <div key={date} className="flex items-center gap-4">
-                    <div className="w-32 text-sm text-gray-600">{date}</div>
-                    <div className="flex-1">
-                      <div 
-                        className="bg-primary/20 h-8 rounded flex items-center justify-end px-2 text-sm font-medium text-primary"
-                        style={{ width: `${percentage}%` }}
-                      >
-                        {views}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+  .sort((a, b) => new Date(b[0]) - new Date(a[0]))
+  .slice(0, 30)
+  .map(([date, views]) => {
+    const maxViews = Math.max(...Object.values(analytics?.viewsByDay || { 1: 1 }));
+    const percentage = Math.max((views / maxViews) * 100, 2); // Minimum 2% visibility
+    return (
+      <div key={date} className="flex items-center gap-2 md:gap-4 mb-2">
+        {/* Shorter date format for mobile */}
+        <div className="w-20 md:w-32 text-[10px] md:text-sm text-gray-600 truncate">
+          {date}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div 
+            className="bg-primary/20 h-6 md:h-8 rounded flex items-center justify-end px-2 text-[10px] md:text-sm font-medium text-primary transition-all duration-500"
+            style={{ width: `${percentage}%` }}
+          >
+            {views}
+          </div>
+        </div>
+      </div>
+    );
+})}
           </div>
         </div>
       </div>

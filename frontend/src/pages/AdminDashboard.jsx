@@ -200,8 +200,8 @@ const AdminDashboard = () => {
   */}
   <div className="h-16 md:hidden flex-shrink-0" />
   {/* 2. SCROLLABLE CONTENT WRAPPER */}
-  <div className="flex-1 overflow-x-hidden">
-    <div className="p-4 md:p-8 max-w-7xl mx-auto w-full">
+  <div className="flex-1 overflow-y-auto overflow-x-hidden bg-gray-50">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto w-full overflow-x-hidden">
       
       {/* Overview Section */}
       {activeTab === 'overview' && (
