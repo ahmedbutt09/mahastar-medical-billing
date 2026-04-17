@@ -133,10 +133,14 @@ const AdminDashboard = () => {
         {/* Sidebar */}
         <aside className={`
           fixed md:relative z-50 bg-dark text-white transition-transform duration-300
-          w-72 h-screen overflow-y-auto
+          w-72 overflow-y-auto
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          md:translate-x-0 md:block
+          md:translate-x-0 md:block md:z-auto
           shadow-xl
+          /* Mobile styles - starts below header */
+          top-[60px] h-[calc(100vh-60px)]
+          /* Desktop styles - full height */
+          md:top-0 md:h-screen
         `}>
           <div className="p-6 border-b border-white/10">
             <h1 className="text-xl font-bold">MahaStar Admin</h1>
@@ -188,11 +192,12 @@ const AdminDashboard = () => {
           </div>
         </aside>
 
-        {/* Main Content */}
-        <main className="flex-1 min-h-screen">
+        {/* Main Content - Add padding for mobile header */}
+        <main className="flex-1 min-h-screen pt-[60px] md:pt-0">
           <div className="p-4 md:p-8">
             {activeTab === 'overview' && (
               <>
+                {/* ... rest of your overview content remains the same ... */}
                 <div className="mb-6">
                   <h1 className="text-2xl md:text-3xl font-bold text-dark">Dashboard Overview</h1>
                   <p className="text-gray-500 mt-1">Welcome back! Here's what's happening with your website.</p>
