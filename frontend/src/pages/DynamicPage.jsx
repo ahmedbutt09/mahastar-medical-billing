@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useLocation, Link } from 'react-router-dom';
 import { 
   Award, TrendingUp, Shield, Clock, CheckCircle, Activity,
   Users, BarChart3, Target, AlertCircle, RefreshCw, Brain,
@@ -14,11 +14,25 @@ const iconMap = {
 };
 
 const DynamicPage = () => {
-  const { type, slug } = useParams();
+  const { type: paramType, slug: paramSlug } = useParams();
+  const location = useLocation();
+  
+  // Determine the actual type from the URL path
+  const getTypeFromPath = () => {
+    const path = location.pathname;
+    if (path.startsWith('/services/')) return 'services';
+    if (path.startsWith('/specialties/')) return 'specialties';
+    if (path.startsWith('/payers/')) return 'payers';
+    if (path.startsWith('/ehr/')) return 'ehr';
+    return paramType; // Fallback to param if available
+  };
+  
+  const type = getTypeFromPath();
+  const slug = paramSlug;
+  
   const [pageData, setPageData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [debugInfo, setDebugInfo] = useState({});
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -31,8 +45,15 @@ const DynamicPage = () => {
       setLoading(true);
       setError(null);
       
-      console.log('🔍 DynamicPage mounted with:', { type, slug });
+      console.log('🔍 DynamicPage mounted with:', { type, slug, path: location.pathname });
       console.log('📡 API Base URL:', api.defaults.baseURL);
+      
+      if (!type || !slug) {
+        console.error('Missing type or slug');
+        setError('Invalid page parameters');
+        setLoading(false);
+        return;
+      }
       
       try {
         const url = `/api/dynamic-page/${type}/${slug}`;
@@ -41,45 +62,23 @@ const DynamicPage = () => {
         const response = await api.get(url);
         
         console.log('📥 Response:', response.data);
-        setDebugInfo({
-          status: response.status,
-          hasData: !!response.data.data,
-          dataKeys: response.data.data ? Object.keys(response.data.data) : []
-        });
         
         if (response.data.success && response.data.data) {
           setPageData(response.data.data);
           console.log('✅ Page data loaded:', response.data.data.page_title);
         } else {
           setError('Page not found in database');
-          console.error('❌ No data in response');
         }
       } catch (err) {
         console.error('❌ Fetch error:', err);
-        console.error('Error details:', {
-          message: err.message,
-          response: err.response?.data,
-          status: err.response?.status
-        });
-        
         setError(err.response?.data?.error || err.message || 'Failed to load page');
-        setDebugInfo({
-          error: err.message,
-          status: err.response?.status,
-          responseData: err.response?.data
-        });
       } finally {
         setLoading(false);
       }
     };
     
-    if (type && slug) {
-      fetchPageData();
-    } else {
-      setError('Invalid page parameters');
-      setLoading(false);
-    }
-  }, [type, slug]);
+    fetchPageData();
+  }, [type, slug, location.pathname]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -96,53 +95,6 @@ const DynamicPage = () => {
     }
   };
 
-  // Debug view - show this while debugging
-  if (debugInfo.error || error) {
-    return (
-      <div className="pt-24 min-h-screen flex items-center justify-center">
-        <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-lg">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Debug Information</h1>
-          
-          <div className="space-y-4">
-            <div className="border-b pb-2">
-              <h2 className="font-semibold text-gray-700">Request Parameters:</h2>
-              <p className="font-mono text-sm">Type: {type}</p>
-              <p className="font-mono text-sm">Slug: {slug}</p>
-            </div>
-            
-            <div className="border-b pb-2">
-              <h2 className="font-semibold text-gray-700">API Configuration:</h2>
-              <p className="font-mono text-sm">Base URL: {api.defaults.baseURL}</p>
-              <p className="font-mono text-sm">Full URL: {api.defaults.baseURL}/api/dynamic-page/{type}/{slug}</p>
-            </div>
-            
-            <div className="border-b pb-2">
-              <h2 className="font-semibold text-gray-700">Error:</h2>
-              <p className="font-mono text-sm text-red-600">{error}</p>
-              {debugInfo.responseData && (
-                <pre className="text-xs bg-gray-100 p-2 mt-2 rounded overflow-auto">
-                  {JSON.stringify(debugInfo.responseData, null, 2)}
-                </pre>
-              )}
-            </div>
-            
-            <div className="mt-6 flex gap-3">
-              <button 
-                onClick={() => window.location.reload()} 
-                className="bg-primary text-white px-4 py-2 rounded hover:bg-secondary"
-              >
-                Retry
-              </button>
-              <Link to="/" className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
-                Go Home
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   if (loading) {
     return (
       <div className="pt-24 min-h-screen flex items-center justify-center">
@@ -151,13 +103,15 @@ const DynamicPage = () => {
     );
   }
 
-  if (!pageData) {
+  if (error || !pageData) {
     return (
       <div className="pt-24 min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-dark mb-4">Page Not Found</h1>
-          <p className="text-gray-600 mb-6">The page you're looking for doesn't exist.</p>
-          <Link to="/" className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary transition">
+        <div className="text-center max-w-md mx-auto p-6">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Page Error</h1>
+          <p className="text-gray-600 mb-2">Type: {type}</p>
+          <p className="text-gray-600 mb-4">Slug: {slug}</p>
+          <p className="text-gray-600 mb-6">{error || 'Page not found'}</p>
+          <Link to="/" className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary transition inline-block">
             Return Home
           </Link>
         </div>
@@ -165,11 +119,11 @@ const DynamicPage = () => {
     );
   }
 
-  // Parse JSON fields
-  const stats = pageData.stats ? JSON.parse(pageData.stats) : [];
-  const features = pageData.features ? JSON.parse(pageData.features) : [];
-  const itemsList = pageData.items_list ? JSON.parse(pageData.items_list) : [];
-  const processSteps = pageData.process_steps ? JSON.parse(pageData.process_steps) : [];
+  // Parse JSON fields (handle both string and parsed)
+  const stats = Array.isArray(pageData.stats) ? pageData.stats : (pageData.stats ? JSON.parse(pageData.stats) : []);
+  const features = Array.isArray(pageData.features) ? pageData.features : (pageData.features ? JSON.parse(pageData.features) : []);
+  const itemsList = Array.isArray(pageData.items_list) ? pageData.items_list : (pageData.items_list ? JSON.parse(pageData.items_list) : []);
+  const processSteps = Array.isArray(pageData.process_steps) ? pageData.process_steps : (pageData.process_steps ? JSON.parse(pageData.process_steps) : []);
 
   return (
     <div className="pt-24 pb-16">

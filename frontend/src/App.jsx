@@ -108,8 +108,6 @@ const AppContent = () => {
           <Route path="/for-independent-practices" element={<ForIndependentPractices />} />
           <Route path="/for-in-house-teams" element={<ForInHouseTeams />} />
           
-          {/* Fallback route for any other dynamic pages */}
-          <Route path="/:type/:slug" element={<DynamicPage />} />
         </Routes>
       </main>
       <Footer />
