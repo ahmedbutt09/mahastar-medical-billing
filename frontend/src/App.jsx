@@ -16,19 +16,15 @@ import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import Pricing from './pages/Pricing';
 import CaseStudies from './pages/CaseStudies';
-
-// NEW: Dynamic page component (replaces all individual service/specialty/payer/ehr pages)
 import DynamicPage from './pages/DynamicPage';
 
-// Keep these listing pages (they show all items, not individual pages)
+// Listing pages
 import Payers from './pages/Payers';
 import Specialties from './pages/Specialties';
 import Resources from './pages/Resources';
 
-// Keep these static pages (unique layouts that don't fit the dynamic pattern)
+// Static pages (unique layouts)
 import AISolutions from './pages/ai/AISolutions';
-import RCMSoftware from './pages/software/RCMSoftware';
-import RCMServices from './pages/automation/RCMServices';
 import Events from './pages/resources/Events';
 import Magazine from './pages/resources/Magazine';
 import Whitepapers from './pages/resources/Whitepapers';
@@ -75,22 +71,16 @@ const AppContent = () => {
           <Route path="/specialties" element={<Specialties />} />
           <Route path="/resources" element={<Resources />} />
           
-          {/* DYNAMIC ROUTES - These replace 50+ individual page routes */}
-          {/* Services dynamic pages: /services/coding, /services/ar-management, /services/credentialing */}
+          {/* Dynamic routes - content from database */}
           <Route path="/services/:slug" element={<DynamicPage />} />
-          
-          {/* Specialties dynamic pages: /specialties/cardiology, /specialties/orthopedics, etc. */}
           <Route path="/specialties/:slug" element={<DynamicPage />} />
-          
-          {/* Payers dynamic pages: /payers/medicare, /payers/medicaid, etc. */}
           <Route path="/payers/:slug" element={<DynamicPage />} />
-          
-          {/* EHR dynamic pages: /ehr/epic, /ehr/cerner, etc. */}
           <Route path="/ehr/:slug" element={<DynamicPage />} />
           <Route path="/software/:slug" element={<DynamicPage />} />
-          {/* Static unique pages (keep as-is) */}
+          <Route path="/automation/:slug" element={<DynamicPage />} />
+          
+          {/* Static unique pages */}
           <Route path="/ai-solutions" element={<AISolutions />} />
-          <Route path="/rcm-automation" element={<RCMServices />} />
           <Route path="/events" element={<Events />} />
           <Route path="/magazine" element={<Magazine />} />
           <Route path="/resources/whitepapers" element={<Whitepapers />} />
@@ -106,7 +96,6 @@ const AppContent = () => {
           <Route path="/for-medical-groups" element={<ForMedicalGroups />} />
           <Route path="/for-independent-practices" element={<ForIndependentPractices />} />
           <Route path="/for-in-house-teams" element={<ForInHouseTeams />} />
-          
         </Routes>
       </main>
       <Footer />
