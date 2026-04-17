@@ -1766,6 +1766,471 @@ app.get('/api/pricing-config', async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+// ============= LEADERSHIP ENDPOINTS =============
+
+// Get all leadership team members
+app.get('/api/leadership', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('leadership')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true });
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error fetching leadership:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Create leadership member
+app.post('/api/leadership', async (req, res) => {
+  try {
+    const { name, title, bio, email, linkedin_url, sort_order, is_active } = req.body;
+    
+    const { data, error } = await supabaseAdmin
+      .from('leadership')
+      .insert([{ name, title, bio, email, linkedin_url, sort_order, is_active, created_at: new Date() }])
+      .select();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error creating leadership:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Update leadership member
+app.put('/api/leadership/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+    updates.updated_at = new Date();
+    
+    const { data, error } = await supabaseAdmin
+      .from('leadership')
+      .update(updates)
+      .eq('id', id)
+      .select();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error updating leadership:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Delete leadership member
+app.delete('/api/leadership/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { error } = await supabaseAdmin
+      .from('leadership')
+      .update({ is_active: false })
+      .eq('id', id);
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, message: 'Leader deleted' });
+  } catch (error) {
+    console.error('Error deleting leadership:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ============= CAREERS ENDPOINTS =============
+
+// Get all job postings
+app.get('/api/careers', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('careers')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error fetching careers:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Create job posting
+app.post('/api/careers', async (req, res) => {
+  try {
+    const { title, department, location, type, description, requirements, salary_range, is_active } = req.body;
+    
+    const { data, error } = await supabaseAdmin
+      .from('careers')
+      .insert([{ title, department, location, type, description, requirements, salary_range, is_active, posted_date: new Date(), created_at: new Date() }])
+      .select();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error creating job:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Update job posting
+app.put('/api/careers/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+    updates.updated_at = new Date();
+    
+    const { data, error } = await supabaseAdmin
+      .from('careers')
+      .update(updates)
+      .eq('id', id)
+      .select();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error updating job:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Delete job posting
+app.delete('/api/careers/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { error } = await supabaseAdmin
+      .from('careers')
+      .update({ is_active: false })
+      .eq('id', id);
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, message: 'Job deleted' });
+  } catch (error) {
+    console.error('Error deleting job:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ============= JOB APPLICATIONS ENDPOINTS =============
+
+// Get all job applications (admin)
+app.get('/api/admin/applications', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('job_applications')
+      .select('*')
+      .order('applied_at', { ascending: false });
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error fetching applications:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Update application status
+app.put('/api/admin/applications/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    const { data, error } = await supabaseAdmin
+      .from('job_applications')
+      .update({ status, updated_at: new Date() })
+      .eq('id', id)
+      .select();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error updating application:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ============= PRICING CONFIG ENDPOINTS =============
+
+// Get pricing configuration
+app.get('/api/pricing-config', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('pricing_config')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true });
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error fetching pricing:', error);
+    // Return demo data if table doesn't exist yet
+    res.status(200).json({ 
+      success: true, 
+      data: [
+        { id: 1, model_key: 'end-to-end', model_name: 'End-to-End RCM', description: 'Full revenue cycle management', price_text: '3.5% - 6.5%', features: ['Patient registration', 'Medical coding', 'Claims submission'], sort_order: 1, is_active: true },
+        { id: 2, model_key: 'partial', model_name: 'Partial RCM', description: 'Choose specific modules', price_text: 'Custom', features: ['Medical coding only', 'Denial management only'], sort_order: 2, is_active: true }
+      ] 
+    });
+  }
+});
+
+// Create pricing model
+app.post('/api/pricing-config', async (req, res) => {
+  try {
+    const { model_key, model_name, description, price_text, features, sort_order, is_active } = req.body;
+    
+    const { data, error } = await supabaseAdmin
+      .from('pricing_config')
+      .insert([{ model_key, model_name, description, price_text, features, sort_order, is_active, created_at: new Date() }])
+      .select();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error creating pricing:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Update pricing model
+app.put('/api/pricing-config/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+    updates.updated_at = new Date();
+    
+    const { data, error } = await supabaseAdmin
+      .from('pricing_config')
+      .update(updates)
+      .eq('id', id)
+      .select();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error updating pricing:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Delete pricing model
+app.delete('/api/pricing-config/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { error } = await supabaseAdmin
+      .from('pricing_config')
+      .update({ is_active: false })
+      .eq('id', id);
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, message: 'Pricing model deleted' });
+  } catch (error) {
+    console.error('Error deleting pricing:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ============= PAGE CONTENT ENDPOINTS (if missing) =============
+
+// Get page content by slug
+app.get('/api/page-content/:slug', async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const { data, error } = await supabaseAdmin
+      .from('page_contents')
+      .select('*')
+      .eq('page_slug', slug)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') throw error;
+    res.status(200).json({ success: true, data: data || null });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get all page contents
+app.get('/api/page-contents', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('page_contents')
+      .select('*')
+      .order('page_name', { ascending: true });
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Create or update page content
+app.post('/api/page-content', async (req, res) => {
+  try {
+    const { page_slug, page_name, hero_title, hero_subtitle, hero_image, content, cta_title, cta_text, cta_button_text, cta_button_link, meta_title, meta_description } = req.body;
+    
+    const { data: existing } = await supabaseAdmin
+      .from('page_contents')
+      .select('id')
+      .eq('page_slug', page_slug)
+      .single();
+    
+    let result;
+    if (existing) {
+      result = await supabaseAdmin
+        .from('page_contents')
+        .update({ page_name, hero_title, hero_subtitle, hero_image, content, cta_title, cta_text, cta_button_text, cta_button_link, meta_title, meta_description, updated_at: new Date() })
+        .eq('page_slug', page_slug)
+        .select();
+    } else {
+      result = await supabaseAdmin
+        .from('page_contents')
+        .insert([{ page_slug, page_name, hero_title, hero_subtitle, hero_image, content, cta_title, cta_text, cta_button_text, cta_button_link, meta_title, meta_description }])
+        .select();
+    }
+    
+    if (result.error) throw result.error;
+    res.status(200).json({ success: true, data: result.data });
+  } catch (error) {
+    console.error('Error saving page content:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ============= DYNAMIC PAGES ENDPOINTS =============
+
+// Get all dynamic pages
+app.get('/api/dynamic-pages', async (req, res) => {
+  try {
+    const { type } = req.query;
+    let query = supabaseAdmin
+      .from('dynamic_pages')
+      .select('*')
+      .eq('is_active', true);
+    
+    if (type) {
+      query = query.eq('page_type', type);
+    }
+    
+    const { data, error } = await query.order('page_title');
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error fetching dynamic pages:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get single dynamic page
+app.get('/api/dynamic-page/:type/:slug', async (req, res) => {
+  try {
+    const { type, slug } = req.params;
+    
+    const { data, error } = await supabaseAdmin
+      .from('dynamic_pages')
+      .select('*')
+      .eq('page_type', type)
+      .eq('slug', slug)
+      .eq('is_active', true)
+      .single();
+    
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return res.status(404).json({ success: false, error: 'Page not found' });
+      }
+      throw error;
+    }
+    
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error fetching dynamic page:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Create dynamic page
+app.post('/api/dynamic-page', async (req, res) => {
+  try {
+    const { page_type, slug, page_title, hero_title, hero_subtitle, main_title, content, cta_title, cta_text, cta_button, cta_link, is_active } = req.body;
+    
+    const { data, error } = await supabaseAdmin
+      .from('dynamic_pages')
+      .insert([{ page_type, slug, page_title, hero_title, hero_subtitle, main_title, content, cta_title, cta_text, cta_button, cta_link, is_active, created_at: new Date() }])
+      .select();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error creating dynamic page:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Update dynamic page
+app.put('/api/dynamic-page/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+    updates.updated_at = new Date();
+    
+    const { data, error } = await supabaseAdmin
+      .from('dynamic_pages')
+      .update(updates)
+      .eq('id', id)
+      .select();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error updating dynamic page:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Delete dynamic page
+app.delete('/api/dynamic-page/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { error } = await supabaseAdmin
+      .from('dynamic_pages')
+      .update({ is_active: false })
+      .eq('id', id);
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, message: 'Page deleted' });
+  } catch (error) {
+    console.error('Error deleting dynamic page:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Toggle dynamic page active status
+app.patch('/api/dynamic-page/:id/toggle', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { is_active } = req.body;
+    
+    const { data, error } = await supabaseAdmin
+      .from('dynamic_pages')
+      .update({ is_active, updated_at: new Date() })
+      .eq('id', id)
+      .select();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error toggling page status:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // A simple health check to test if the backend is alive
 // Health check for Vercel testing
 app.get('/api/health', (req, res) => {

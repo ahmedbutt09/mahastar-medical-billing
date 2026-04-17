@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { trackPageView } from './utils/analytics';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
 import Services from './pages/Services';
@@ -54,7 +55,11 @@ const AppContent = () => {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/admin" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/dashboard" element={
+  <ProtectedRoute>
+    <AdminDashboard />
+  </ProtectedRoute>
+} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/case-studies" element={<CaseStudies />} />
           
