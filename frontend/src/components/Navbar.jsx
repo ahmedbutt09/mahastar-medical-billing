@@ -38,8 +38,9 @@ const Navbar = () => {
         { path: '/services/credentialing', label: 'Provider Credentialing' },
         { path: '/services/denial-management', label: 'Denial Management' },
         { path: '/services/telehealth', label: 'Telehealth Billing' },
-        { path: '/rcm-software', label: 'RCM Software' },
-        { path: '/rcm-automation', label: 'RCM Automation' },
+        // Software & Automation
+  { path: '/software/rcm-software', label: 'RCM Software' },
+  { path: '/automation/rcm-automation', label: 'RCM Automation' },
         { path: '/ai-solutions', label: 'AI Solutions' },
       ]
     },
