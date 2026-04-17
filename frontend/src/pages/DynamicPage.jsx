@@ -26,6 +26,7 @@ const DynamicPage = () => {
     if (path.startsWith('/ehr/')) return 'ehr';
     if (path.startsWith('/software/')) return 'software';
     if (path.startsWith('/automation/')) return 'automation';
+    if (path.startsWith('/solutions/')) return 'solutions';
     return null;
   };
   
