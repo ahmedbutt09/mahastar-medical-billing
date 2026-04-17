@@ -1679,20 +1679,49 @@ app.get('/api/careers', async (req, res) => {
   }
 });
 
-// Apply for job
+// Apply for job - UPDATED with better error handling
 app.post('/api/careers/:id/apply', async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, phone, resume_url, cover_letter } = req.body;
+    const { name, email, phone, cover_letter } = req.body;
     
-    const { error } = await supabaseAdmin
+    // Validate required fields
+    if (!name || !email) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Name and email are required' 
+      });
+    }
+    
+    const { data, error } = await supabaseAdmin
       .from('job_applications')
-      .insert([{ job_id: id, name, email, phone, resume_url, cover_letter }]);
+      .insert([{ 
+        job_id: parseInt(id), 
+        name, 
+        email, 
+        phone: phone || null, 
+        cover_letter: cover_letter || null,
+        status: 'pending',
+        applied_at: new Date()
+      }])
+      .select();
     
-    if (error) throw error;
-    res.status(200).json({ success: true, message: 'Application submitted successfully' });
+    if (error) {
+      console.error('Supabase error:', error);
+      throw error;
+    }
+    
+    res.status(200).json({ 
+      success: true, 
+      message: 'Application submitted successfully',
+      data: data 
+    });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    console.error('Error submitting application:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message || 'Failed to submit application' 
+    });
   }
 });
 // A simple health check to test if the backend is alive

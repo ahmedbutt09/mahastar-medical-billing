@@ -484,70 +484,70 @@ const ResourcePage = () => {
   }
 
   // ============ HIPAA COMPLIANCE GUIDE ============
-  if (type === 'hipaa-guide') {
-    return (
-      <div className="pt-24 pb-16">
-        <section className="bg-gradient-to-r from-dark to-primary text-white py-20">
-          <div className="max-w-7xl mx-auto px-4 text-center">
-            {getIcon()}
-            <h1 className="text-5xl font-bold mb-4">{getTitle()}</h1>
-            <p className="text-xl text-blue-100 max-w-3xl mx-auto">{getSubtitle()}</p>
-          </div>
-        </section>
+if (type === 'hipaa-guide') {
+  return (
+    <div className="pt-24 pb-16">
+      <section className="bg-gradient-to-r from-dark to-primary text-white py-20">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          {getIcon()}
+          <h1 className="text-5xl font-bold mb-4">{getTitle()}</h1>
+          <p className="text-xl text-blue-100 max-w-3xl mx-auto">{getSubtitle()}</p>
+        </div>
+      </section>
 
-        <section className="py-16">
-          <div className="max-w-4xl mx-auto px-4">
-            {resources.map(guide => (
-              <div key={guide.id}>
-                <div className="bg-blue-50 rounded-xl p-6 mb-8">
-                  <h2 className="text-2xl font-bold text-dark mb-4">Your HIPAA Compliance Partner</h2>
-                  <p className="text-gray-700 mb-4">
-                    MahaStar is fully HIPAA compliant, SOC2 Type II audited, and VAPT certified. 
-                    We sign Business Associate Agreements (BAA) with all clients and maintain 
-                    enterprise-grade security controls.
-                  </p>
-                  <div className="flex flex-wrap gap-4">
-                    <span className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full text-sm">
-                      <Shield className="w-4 h-4 text-primary" /> HIPAA Compliant
-                    </span>
-                    <span className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full text-sm">
-                      <Shield className="w-4 h-4 text-primary" /> SOC2 Type II
-                    </span>
-                    <span className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full text-sm">
-                      <Shield className="w-4 h-4 text-primary" /> VAPT Audited
-                    </span>
-                  </div>
-                </div>
-
-                <div 
-                  className="prose prose-lg max-w-none mb-8"
-                  dangerouslySetInnerHTML={{ __html: guide.content || '' }}
-                />
-
-                <div className="bg-gray-50 rounded-xl p-6 text-center">
-                  <FileText className="w-12 h-12 text-primary mx-auto mb-3" />
-                  <h3 className="text-xl font-bold text-dark mb-2">Download Full Compliance Guide</h3>
-                  <p className="text-gray-600 mb-4">Get our complete 24-page HIPAA compliance guide for medical practices.</p>
-                  <button 
-                    onClick={() => openDownloadModal(guide)}
-                    className="bg-primary text-white px-6 py-2 rounded-lg inline-flex items-center gap-2 hover:bg-secondary transition"
-                  >
-                    <Download size={16} /> Download PDF
-                  </button>
+      <section className="py-16">
+        <div className="max-w-4xl mx-auto px-4">
+          {resources.map(guide => (
+            <div key={guide.id}>
+              <div className="bg-blue-50 rounded-xl p-6 mb-8">
+                <h2 className="text-2xl font-bold text-dark mb-4">Your HIPAA Compliance Partner</h2>
+                <p className="text-gray-700 mb-4">
+                  MahaStar is fully HIPAA compliant, SOC2 Type II audited, and VAPT certified. 
+                  We sign Business Associate Agreements (BAA) with all clients and maintain 
+                  enterprise-grade security controls.
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  <span className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full text-sm">
+                    <Shield className="w-4 h-4 text-primary" /> HIPAA Compliant
+                  </span>
+                  <span className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full text-sm">
+                    <Shield className="w-4 h-4 text-primary" /> SOC2 Type II
+                  </span>
+                  <span className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full text-sm">
+                    <Shield className="w-4 h-4 text-primary" /> VAPT Audited
+                  </span>
                 </div>
               </div>
-            ))}
-          </div>
-        </section>
 
-        <section className="bg-primary text-white py-16 text-center">
-          <Link to="/contact" className="bg-accent px-8 py-3 rounded-lg font-semibold inline-block hover:bg-secondary transition">
-            Request Compliance Consultation
-          </Link>
-        </section>
-      </div>
-    );
-  }
+              <div 
+                className="prose prose-lg max-w-none mb-8"
+                dangerouslySetInnerHTML={{ __html: guide.content || '' }}
+              />
+
+              <div className="bg-gray-50 rounded-xl p-6 text-center">
+                <FileText className="w-12 h-12 text-primary mx-auto mb-3" />
+                <h3 className="text-xl font-bold text-dark mb-2">Download Full Compliance Guide</h3>
+                <p className="text-gray-600 mb-4">Get our complete 24-page HIPAA compliance guide for medical practices.</p>
+                <button 
+                  onClick={() => openDownloadModal(guide)}
+                  className="bg-primary text-white px-6 py-2 rounded-lg inline-flex items-center gap-2 hover:bg-secondary transition"
+                >
+                  <Download size={16} /> Download PDF
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="bg-primary text-white py-16 text-center">
+        <Link to="/contact" className="bg-accent px-8 py-3 rounded-lg font-semibold inline-block hover:bg-secondary transition">
+          Request Compliance Consultation
+        </Link>
+      </section>
+    </div>
+  );
+}
 
   // ============ CODING UPDATES ============
   if (type === 'coding-updates') {

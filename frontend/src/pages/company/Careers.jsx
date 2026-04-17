@@ -1,7 +1,7 @@
 // src/pages/company/Careers.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Briefcase, MapPin, Clock, DollarSign, Loader, ChevronDown, ChevronUp } from 'lucide-react';
+import { Briefcase, MapPin, Clock, DollarSign, Loader, Mail, Phone, FileText, Send } from 'lucide-react';
 import api from '../../api';
 
 const Careers = () => {
@@ -9,6 +9,7 @@ const Careers = () => {
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -40,14 +41,23 @@ const Careers = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
+    
     try {
-      await api.post(`/api/careers/${selectedJob.id}/apply`, formData);
-      alert(`Application submitted for ${selectedJob.title}! We'll contact you soon.`);
-      setShowModal(false);
-      setSelectedJob(null);
-      setFormData({ name: '', email: '', phone: '', cover_letter: '' });
+      const response = await api.post(`/api/careers/${selectedJob.id}/apply`, formData);
+      if (response.data.success) {
+        alert(`✅ Application submitted for ${selectedJob.title}!\n\nWe'll review your application and contact you within 3-5 business days.`);
+        setShowModal(false);
+        setSelectedJob(null);
+        setFormData({ name: '', email: '', phone: '', cover_letter: '' });
+      } else {
+        alert('❌ Error: ' + (response.data.error || 'Failed to submit application'));
+      }
     } catch (error) {
-      alert('Error submitting application. Please try again.');
+      console.error('Error submitting application:', error);
+      alert('❌ Error submitting application. Please try again or email us directly at careers@mahastar.com');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -94,8 +104,10 @@ const Careers = () => {
           <h2 className="text-3xl font-bold text-dark mb-8">Open Positions</h2>
           
           {jobs.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-gray-500">No open positions at this time. Check back soon!</p>
+            <div className="text-center py-12 bg-gray-50 rounded-xl">
+              <Briefcase className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500 text-lg">No open positions at this time.</p>
+              <p className="text-gray-400">Check back soon or send your resume to careers@mahastar.com</p>
             </div>
           )}
 
@@ -138,50 +150,99 @@ const Careers = () => {
           <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold text-dark">Apply for {selectedJob.title}</h3>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+              <button 
+                onClick={() => setShowModal(false)} 
+                className="text-gray-400 hover:text-gray-600 text-2xl"
+              >
+                ×
+              </button>
             </div>
+            
+            <div className="bg-blue-50 rounded-lg p-3 mb-4 text-sm">
+              <p className="text-gray-600">
+                <strong>Position:</strong> {selectedJob.title}<br />
+                <strong>Department:</strong> {selectedJob.department}<br />
+                <strong>Location:</strong> {selectedJob.location}
+              </p>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Full Name <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   required
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary focus:border-primary"
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  placeholder="John Doe"
                 />
               </div>
+              
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="email"
                   required
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary focus:border-primary"
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  placeholder="john@example.com"
                 />
               </div>
+              
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
                 <input
                   type="tel"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary focus:border-primary"
                   value={formData.phone}
                   onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  placeholder="(555) 123-4567"
                 />
               </div>
+              
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cover Letter</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Cover Letter / Notes</label>
                 <textarea
                   rows="4"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary focus:border-primary"
                   value={formData.cover_letter}
                   onChange={(e) => setFormData({...formData, cover_letter: e.target.value})}
+                  placeholder="Tell us why you're interested in this position..."
                 />
               </div>
-              <button type="submit" className="w-full bg-primary text-white py-2 rounded-lg hover:bg-secondary transition">
-                Submit Application
-              </button>
+              
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-secondary transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader className="w-4 h-4 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <Send size={16} />
+                      Submit Application
+                    </>
+                  )}
+                </button>
+              </div>
             </form>
           </div>
         </div>
