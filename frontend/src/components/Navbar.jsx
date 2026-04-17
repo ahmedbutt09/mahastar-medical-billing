@@ -41,7 +41,7 @@ const Navbar = () => {
         // Software & Automation
   { path: '/software/rcm-software', label: 'RCM Software' },
   { path: '/automation/rcm-automation', label: 'RCM Automation' },
-        { path: '/ai-solutions', label: 'AI Solutions' },
+        { path: '/solutions/ai-solutions', label: 'AI Solutions' },
       ]
     },
     solutions: {

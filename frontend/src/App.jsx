@@ -78,9 +78,9 @@ const AppContent = () => {
           <Route path="/ehr/:slug" element={<DynamicPage />} />
           <Route path="/software/:slug" element={<DynamicPage />} />
           <Route path="/automation/:slug" element={<DynamicPage />} />
-          
+          <Route path="/solutions/:slug" element={<DynamicPage />} />
           {/* Static unique pages */}
-          <Route path="/ai-solutions" element={<AISolutions />} />
+         
           <Route path="/events" element={<Events />} />
           <Route path="/magazine" element={<Magazine />} />
           <Route path="/resources/whitepapers" element={<Whitepapers />} />
