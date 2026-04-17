@@ -112,15 +112,15 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Mobile Header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 bg-dark text-white z-40 px-4 py-3 flex items-center justify-between shadow-lg">
+      {/* Mobile Header - Only visible on mobile */}
+      <div className="md:hidden fixed top-0 left-0 right-0 bg-dark text-white z-30 px-4 py-3 flex items-center justify-between shadow-lg">
         <h1 className="text-lg font-bold">MahaStar Admin</h1>
         <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2">
           <Menu size={24} />
         </button>
       </div>
 
-      {/* Mobile Overlay */}
+      {/* Mobile Overlay - Only visible when sidebar is open on mobile */}
       {sidebarOpen && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
@@ -130,23 +130,23 @@ const AdminDashboard = () => {
 
       {/* Desktop Layout */}
       <div className="flex min-h-screen">
-        {/* Sidebar */}
+        {/* Sidebar - Always visible on desktop, togglable on mobile */}
         <aside className={`
-          fixed md:relative z-50 bg-dark text-white transition-transform duration-300
-          w-72 overflow-y-auto
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          md:translate-x-0 md:block md:z-auto
+          fixed md:relative bg-dark text-white transition-transform duration-300
+          w-72 h-screen overflow-y-auto
           shadow-xl
-          /* Mobile styles - starts below header */
-          top-[60px] h-[calc(100vh-60px)]
-          /* Desktop styles - full height */
-          md:top-0 md:h-screen
+          /* Mobile styles */
+          top-0 z-50
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          /* Desktop styles - always visible */
+          md:translate-x-0 md:block md:z-auto
         `}>
           <div className="p-6 border-b border-white/10">
             <h1 className="text-xl font-bold">MahaStar Admin</h1>
             <p className="text-xs text-gray-400 mt-1">Content Management System</p>
           </div>
           
+          {/* Close button - Only visible on mobile */}
           <button 
             onClick={() => setSidebarOpen(false)}
             className="absolute top-4 right-4 text-gray-400 hover:text-white md:hidden"
@@ -160,7 +160,7 @@ const AdminDashboard = () => {
                 key={item.id}
                 onClick={() => {
                   setActiveTab(item.id);
-                  setSidebarOpen(false);
+                  setSidebarOpen(false); // Close sidebar on mobile after selection
                 }}
                 className={`
                   w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
@@ -192,108 +192,110 @@ const AdminDashboard = () => {
           </div>
         </aside>
 
-        {/* Main Content - Add padding for mobile header */}
-        <main className="flex-1 min-h-screen pt-[60px] md:pt-0">
-          <div className="p-4 md:p-8">
-            {activeTab === 'overview' && (
-              <>
-                {/* ... rest of your overview content remains the same ... */}
-                <div className="mb-6">
-                  <h1 className="text-2xl md:text-3xl font-bold text-dark">Dashboard Overview</h1>
-                  <p className="text-gray-500 mt-1">Welcome back! Here's what's happening with your website.</p>
-                </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
-                  <div className="bg-white rounded-xl shadow-md p-4 md:p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-2xl md:text-3xl font-bold text-primary">{stats.totalContacts}</div>
-                        <div className="text-sm text-gray-600">Total Contacts</div>
-                      </div>
-                      <Mail className="w-8 h-8 md:w-10 md:h-10 text-primary/30" />
-                    </div>
-                    <div className="mt-2 text-xs text-yellow-600">{stats.pendingContacts} pending</div>
+        {/* Main Content */}
+        <main className="flex-1 min-h-screen">
+          {/* Add padding for mobile header, but not on desktop */}
+          <div className="pt-[60px] md:pt-0">
+            <div className="p-4 md:p-8">
+              {activeTab === 'overview' && (
+                <>
+                  <div className="mb-6">
+                    <h1 className="text-2xl md:text-3xl font-bold text-dark">Dashboard Overview</h1>
+                    <p className="text-gray-500 mt-1">Welcome back! Here's what's happening with your website.</p>
                   </div>
                   
-                  <div className="bg-white rounded-xl shadow-md p-4 md:p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-2xl md:text-3xl font-bold text-primary">{stats.totalSubscribers}</div>
-                        <div className="text-sm text-gray-600">Newsletter Subs</div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+                    <div className="bg-white rounded-xl shadow-md p-4 md:p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-2xl md:text-3xl font-bold text-primary">{stats.totalContacts}</div>
+                          <div className="text-sm text-gray-600">Total Contacts</div>
+                        </div>
+                        <Mail className="w-8 h-8 md:w-10 md:h-10 text-primary/30" />
                       </div>
-                      <Users className="w-8 h-8 md:w-10 md:h-10 text-primary/30" />
+                      <div className="mt-2 text-xs text-yellow-600">{stats.pendingContacts} pending</div>
+                    </div>
+                    
+                    <div className="bg-white rounded-xl shadow-md p-4 md:p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-2xl md:text-3xl font-bold text-primary">{stats.totalSubscribers}</div>
+                          <div className="text-sm text-gray-600">Newsletter Subs</div>
+                        </div>
+                        <Users className="w-8 h-8 md:w-10 md:h-10 text-primary/30" />
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white rounded-xl shadow-md p-4 md:p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-2xl md:text-3xl font-bold text-primary">{stats.totalDynamicPages}</div>
+                          <div className="text-sm text-gray-600">Dynamic Pages</div>
+                        </div>
+                        <Layout className="w-8 h-8 md:w-10 md:h-10 text-primary/30" />
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white rounded-xl shadow-md p-4 md:p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-2xl md:text-3xl font-bold text-primary">{stats.totalPageViews.toLocaleString()}</div>
+                          <div className="text-sm text-gray-600">Page Views</div>
+                        </div>
+                        <BarChart3 className="w-8 h-8 md:w-10 md:h-10 text-primary/30" />
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className="bg-white rounded-xl shadow-md p-4 md:p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-2xl md:text-3xl font-bold text-primary">{stats.totalDynamicPages}</div>
-                        <div className="text-sm text-gray-600">Dynamic Pages</div>
-                      </div>
-                      <Layout className="w-8 h-8 md:w-10 md:h-10 text-primary/30" />
-                    </div>
-                  </div>
-                  
-                  <div className="bg-white rounded-xl shadow-md p-4 md:p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-2xl md:text-3xl font-bold text-primary">{stats.totalPageViews.toLocaleString()}</div>
-                        <div className="text-sm text-gray-600">Page Views</div>
-                      </div>
-                      <BarChart3 className="w-8 h-8 md:w-10 md:h-10 text-primary/30" />
-                    </div>
-                  </div>
-                </div>
 
-                <div className="bg-white rounded-xl shadow-md overflow-hidden">
-                  <div className="p-4 md:p-6 border-b bg-gray-50">
-                    <h2 className="text-lg md:text-xl font-bold text-dark">Recent Contacts</h2>
-                  </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500">Date</th>
-                          <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500">Name</th>
-                          <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500">Email</th>
-                          <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500">Subject</th>
-                          <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200">
-                        {recentContacts.map(contact => (
-                          <tr key={contact.id} className="hover:bg-gray-50">
-                            <td className="px-4 md:px-6 py-4 text-sm">{new Date(contact.created_at).toLocaleDateString()}</td>
-                            <td className="px-4 md:px-6 py-4 font-medium">{contact.name}</td>
-                            <td className="px-4 md:px-6 py-4 text-sm">{contact.email}</td>
-                            <td className="px-4 md:px-6 py-4 text-sm">{contact.subject}</td>
-                            <td className="px-4 md:px-6 py-4">
-                              <span className={`px-2 py-1 text-xs rounded-full ${
-                                contact.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                              }`}>
-                                {contact.status || 'pending'}
-                              </span>
-                            </td>
+                  <div className="bg-white rounded-xl shadow-md overflow-hidden">
+                    <div className="p-4 md:p-6 border-b bg-gray-50">
+                      <h2 className="text-lg md:text-xl font-bold text-dark">Recent Contacts</h2>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500">Date</th>
+                            <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500">Name</th>
+                            <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500">Email</th>
+                            <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500">Subject</th>
+                            <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500">Status</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                          {recentContacts.map(contact => (
+                            <tr key={contact.id} className="hover:bg-gray-50">
+                              <td className="px-4 md:px-6 py-4 text-sm">{new Date(contact.created_at).toLocaleDateString()}</td>
+                              <td className="px-4 md:px-6 py-4 font-medium">{contact.name}</td>
+                              <td className="px-4 md:px-6 py-4 text-sm">{contact.email}</td>
+                              <td className="px-4 md:px-6 py-4 text-sm">{contact.subject}</td>
+                              <td className="px-4 md:px-6 py-4">
+                                <span className={`px-2 py-1 text-xs rounded-full ${
+                                  contact.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                }`}>
+                                  {contact.status || 'pending'}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
-              </>
-            )}
+                </>
+              )}
 
-            {activeTab === 'contacts' && <ContactsManager />}
-            {activeTab === 'subscribers' && <SubscribersManager />}
-            {activeTab === 'chat' && <ChatCallbacksManager />}
-            {activeTab === 'dynamic-pages' && <DynamicPagesManager />}
-            {activeTab === 'case-studies' && <CaseStudiesManager />}
-            {activeTab === 'resources' && <ResourcesManager />}
-            {activeTab === 'pricing' && <PricingManager />}
-            {activeTab === 'leadership' && <LeadershipManager />}
-            {activeTab === 'careers' && <CareersManager />}
-            {activeTab === 'analytics' && <AnalyticsManager />}
+              {activeTab === 'contacts' && <ContactsManager />}
+              {activeTab === 'subscribers' && <SubscribersManager />}
+              {activeTab === 'chat' && <ChatCallbacksManager />}
+              {activeTab === 'dynamic-pages' && <DynamicPagesManager />}
+              {activeTab === 'case-studies' && <CaseStudiesManager />}
+              {activeTab === 'resources' && <ResourcesManager />}
+              {activeTab === 'pricing' && <PricingManager />}
+              {activeTab === 'leadership' && <LeadershipManager />}
+              {activeTab === 'careers' && <CareersManager />}
+              {activeTab === 'analytics' && <AnalyticsManager />}
+            </div>
           </div>
         </main>
       </div>
