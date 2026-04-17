@@ -1724,6 +1724,48 @@ app.post('/api/careers/:id/apply', async (req, res) => {
     });
   }
 });
+// Get all case studies (with optional filters)
+app.get('/api/case-studies', async (req, res) => {
+  try {
+    const { featured, specialty } = req.query;
+    let query = supabaseAdmin
+      .from('case_studies')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true });
+    
+    if (featured === 'true') {
+      query = query.eq('is_featured', true);
+    }
+    
+    if (specialty && specialty !== 'All') {
+      query = query.eq('specialty', specialty);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error fetching case studies:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+// Get pricing configuration
+app.get('/api/pricing-config', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('pricing_config')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true });
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 // A simple health check to test if the backend is alive
 // Health check for Vercel testing
 app.get('/api/health', (req, res) => {

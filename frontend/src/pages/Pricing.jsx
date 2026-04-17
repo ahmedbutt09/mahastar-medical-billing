@@ -1,73 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, Zap, Building2, Users, Clock, DollarSign } from 'lucide-react';
+import { Check, Loader } from 'lucide-react';
+import api from '../api';
 
 const Pricing = () => {
   const [selectedModel, setSelectedModel] = useState('end-to-end');
-
-  const models = {
-    'end-to-end': {
-      name: 'End-to-End RCM',
-      description: 'Full revenue cycle management from patient registration to final payment',
-      price: '3.5% - 6.5%',
-      features: [
-        'Patient registration & eligibility verification',
-        'Medical coding (AAPC certified)',
-        'Claims submission & tracking',
-        'Payment posting & reconciliation',
-        'Denial management & appeals',
-        'AR follow-up (30+ days)',
-        'Monthly performance reporting',
-        'Dedicated account manager'
-      ]
-    },
-    'partial': {
-      name: 'Partial RCM',
-      description: 'Choose specific modules to complement your existing team',
-      price: 'Custom',
-      features: [
-        'Medical coding only',
-        'Denial management only',
-        'AR follow-up only',
-        'Credentialing services',
-        'Telehealth billing',
-        'Pay-per-claim model available',
-        'No long-term commitment',
-        'Scale up/down monthly'
-      ]
-    },
-    'co-managed': {
-      name: 'Co-Managed System',
-      description: 'We augment your internal billing team with our specialists',
-      price: '$45 - $65 / hour',
-      features: [
-        'Dedicated offshore team members',
-        'Work alongside your existing billers',
-        'Train on your existing workflows',
-        'No minimum hours commitment',
-        'Same-day task completion',
-        'Weekly strategy calls',
-        'Transparent time tracking',
-        '30-day satisfaction guarantee'
-      ]
-    },
-    'fte': {
-      name: 'FTE Model',
-      description: 'Dedicated full-time equivalent team at 60% less cost',
-      price: '$2,500 - $4,500 / month',
-      features: [
-        'Dedicated billers assigned to your practice',
-        'Full-time coverage (40 hours/week)',
-        'Same US-based workflows',
-        'HIPAA & SOC2 compliant',
-        'Includes all software licenses',
-        'Monthly performance bonuses',
-        '12-month lock-in rate',
-        'Free replacement if needed'
-      ]
-    }
-  };
-
+  const [pricingModels, setPricingModels] = useState({});
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     providerCount: 5,
     monthlyClaims: 1000,
@@ -76,6 +15,29 @@ const Pricing = () => {
     phone: ''
   });
 
+  useEffect(() => {
+    fetchPricingConfig();
+  }, []);
+
+  const fetchPricingConfig = async () => {
+    try {
+      const response = await api.get('/api/pricing-config');
+      if (response.data.success) {
+        const modelsMap = {};
+        response.data.data.forEach(model => {
+          modelsMap[model.model_key] = model;
+        });
+        setPricingModels(modelsMap);
+      }
+    } catch (error) {
+      console.error('Error fetching pricing:', error);
+      // Fallback to hardcoded data if API fails
+      setPricingModels(fallbackPricing);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const estimatedSavings = () => {
     const baseCost = formData.monthlyClaims * 25;
     const mahastarCost = formData.monthlyClaims * 8;
@@ -83,10 +45,20 @@ const Pricing = () => {
     return savings > 0 ? savings.toLocaleString() : 0;
   };
 
+  if (loading) {
+    return (
+      <div className="pt-24 min-h-screen flex items-center justify-center">
+        <Loader className="w-12 h-12 text-primary animate-spin" />
+      </div>
+    );
+  }
+
+  const currentModel = pricingModels[selectedModel] || {};
+
   return (
     <div className="pt-24 pb-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4">
-        {/* Header */}
+        {/* Header - Static */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-dark mb-4">
             Simple, Transparent Pricing
@@ -96,9 +68,9 @@ const Pricing = () => {
           </p>
         </div>
 
-        {/* Pricing Model Selector */}
+        {/* Pricing Model Selector - Dynamic from DB */}
         <div className="flex flex-wrap justify-center gap-4 mb-12">
-          {Object.keys(models).map((key) => (
+          {Object.keys(pricingModels).map((key) => (
             <button
               key={key}
               onClick={() => setSelectedModel(key)}
@@ -108,18 +80,18 @@ const Pricing = () => {
                   : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
               }`}
             >
-              {models[key].name}
+              {pricingModels[key]?.model_name}
             </button>
           ))}
         </div>
 
-        {/* Pricing Card */}
+        {/* Pricing Card - Dynamic from DB */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-12">
           <div className="grid md:grid-cols-2">
             <div className="p-8 bg-gradient-to-br from-dark to-primary text-white">
-              <h3 className="text-2xl font-bold mb-2">{models[selectedModel].name}</h3>
-              <p className="text-blue-100 mb-4">{models[selectedModel].description}</p>
-              <div className="text-4xl font-bold mb-1">{models[selectedModel].price}</div>
+              <h3 className="text-2xl font-bold mb-2">{currentModel.model_name}</h3>
+              <p className="text-blue-100 mb-4">{currentModel.description}</p>
+              <div className="text-4xl font-bold mb-1">{currentModel.price_text}</div>
               <p className="text-blue-100 text-sm mb-6">per month • no setup fee</p>
               <Link
                 to="/contact"
@@ -132,7 +104,7 @@ const Pricing = () => {
             <div className="p-8">
               <h4 className="font-semibold text-lg mb-4 text-dark">What's included:</h4>
               <div className="space-y-3">
-                {models[selectedModel].features.map((feature, idx) => (
+                {currentModel.features?.map((feature, idx) => (
                   <div key={idx} className="flex items-start gap-3">
                     <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                     <span className="text-gray-700">{feature}</span>
@@ -143,7 +115,7 @@ const Pricing = () => {
           </div>
         </div>
 
-        {/* ROI Calculator */}
+        {/* ROI Calculator - Static (interactive) */}
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-12">
           <h3 className="text-2xl font-bold text-dark text-center mb-6">
             📊 See How Much You Can Save
@@ -196,7 +168,7 @@ const Pricing = () => {
           </div>
         </div>
 
-        {/* FAQ Section */}
+        {/* FAQ Section - Static */}
         <div className="text-center">
           <h3 className="text-xl font-semibold text-dark mb-4">Frequently Asked Questions</h3>
           <p className="text-gray-600">
@@ -206,6 +178,34 @@ const Pricing = () => {
       </div>
     </div>
   );
+};
+
+// Fallback data if API fails
+const fallbackPricing = {
+  'end-to-end': {
+    model_name: 'End-to-End RCM',
+    description: 'Full revenue cycle management',
+    price_text: '3.5% - 6.5%',
+    features: ['Patient registration', 'Medical coding', 'Claims submission']
+  },
+  'partial': {
+    model_name: 'Partial RCM',
+    description: 'Choose specific modules',
+    price_text: 'Custom',
+    features: ['Medical coding only', 'Denial management only']
+  },
+  'co-managed': {
+    model_name: 'Co-Managed System',
+    description: 'Augment your team',
+    price_text: '$45 - $65 / hour',
+    features: ['Dedicated team members', 'No minimum hours']
+  },
+  'fte': {
+    model_name: 'FTE Model',
+    description: 'Dedicated full-time team',
+    price_text: '$2,500 - $4,500 / month',
+    features: ['Dedicated billers', 'Full-time coverage']
+  }
 };
 
 export default Pricing;
