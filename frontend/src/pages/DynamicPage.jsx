@@ -3,32 +3,33 @@ import { useParams, useLocation, Link } from 'react-router-dom';
 import { 
   Award, TrendingUp, Shield, Clock, CheckCircle, Activity,
   Users, BarChart3, Target, AlertCircle, RefreshCw, Brain,
-  Eye, Heart, Database, FileCheck, Building2, Loader
+  Eye, Heart, Database, FileCheck, Building2, Loader, Bot, Zap
 } from 'lucide-react';
 import api from '../api';
 
 const iconMap = {
   Award, TrendingUp, Shield, Clock, CheckCircle, Activity,
   Users, BarChart3, Target, AlertCircle, RefreshCw, Brain,
-  Eye, Heart, Database, FileCheck, Building2
+  Eye, Heart, Database, FileCheck, Building2, Bot, Zap
 };
 
 const DynamicPage = () => {
-  const { type: paramType, slug: paramSlug } = useParams();
+  const { slug } = useParams();
   const location = useLocation();
   
-  // Determine the actual type from the URL path
+  // Determine the type from the URL path
   const getTypeFromPath = () => {
     const path = location.pathname;
     if (path.startsWith('/services/')) return 'services';
     if (path.startsWith('/specialties/')) return 'specialties';
     if (path.startsWith('/payers/')) return 'payers';
     if (path.startsWith('/ehr/')) return 'ehr';
-    return paramType; // Fallback to param if available
+    if (path.startsWith('/software/')) return 'software';
+    if (path.startsWith('/automation/')) return 'automation';
+    return null;
   };
   
   const type = getTypeFromPath();
-  const slug = paramSlug;
   
   const [pageData, setPageData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -46,7 +47,6 @@ const DynamicPage = () => {
       setError(null);
       
       console.log('🔍 DynamicPage mounted with:', { type, slug, path: location.pathname });
-      console.log('📡 API Base URL:', api.defaults.baseURL);
       
       if (!type || !slug) {
         console.error('Missing type or slug');
@@ -60,8 +60,6 @@ const DynamicPage = () => {
         console.log(`📤 Fetching: ${url}`);
         
         const response = await api.get(url);
-        
-        console.log('📥 Response:', response.data);
         
         if (response.data.success && response.data.data) {
           setPageData(response.data.data);
@@ -202,6 +200,8 @@ const DynamicPage = () => {
                   <h3 className="text-2xl font-bold text-dark mb-4">
                     {pageData.page_type === 'specialties' ? 'Conditions & Procedures We Treat' : 
                      pageData.page_type === 'payers' ? 'Coverage Types' :
+                     pageData.page_type === 'software' ? 'Software Features' :
+                     pageData.page_type === 'automation' ? 'Automation Capabilities' :
                      'Services We Provide'}
                   </h3>
                   <div className="flex flex-wrap gap-2 mb-8">
@@ -218,7 +218,10 @@ const DynamicPage = () => {
               {processSteps.length > 0 && (
                 <div className="bg-gray-50 rounded-xl p-6">
                   <h4 className="font-bold text-dark text-lg mb-4">
-                    {pageData.page_type === 'services' ? 'Our Process' : 'How We Help'}
+                    {pageData.page_type === 'services' ? 'Our Process' : 
+                     pageData.page_type === 'software' ? 'Implementation Process' :
+                     pageData.page_type === 'automation' ? 'Automation Journey' :
+                     'How We Help'}
                   </h4>
                   <ol className="space-y-4">
                     {processSteps.map((step, idx) => (
