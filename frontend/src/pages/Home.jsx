@@ -77,10 +77,10 @@ const Home = () => {
   ];
 
   const pricingModels = [
-    { name: 'End-to-End RCM', price: 'Custom', description: 'Full cycle: coding to payment posting', bestFor: '5+ providers' },
-    { name: 'Partial RCM', price: 'Custom', description: 'Pick modules (coding + denial only)', bestFor: 'Practices with internal billers' },
-    { name: 'Co-Managed', price: 'Hourly', description: 'We augment your team with specialists', bestFor: 'Flexible scaling' },
-    { name: 'FTE Model', price: 'Monthly', description: 'Dedicated offshore team at 60% less cost', bestFor: 'High volume practices' },
+    { name: 'End-to-End RCM', price: 'Custom', description: 'Full cycle: coding to payment posting', bestFor: '5+ providers', slug: 'end-to-end-rcm' },
+    { name: 'Partial RCM', price: 'Custom', description: 'Pick modules (coding + denial only)', bestFor: 'Practices with internal billers', slug: 'partial-rcm' },
+    { name: 'Co-Managed', price: 'Hourly', description: 'We augment your team with specialists', bestFor: 'Flexible scaling', slug: 'co-managed' },
+    { name: 'FTE Model', price: 'Monthly', description: 'Dedicated offshore team at 60% less cost', bestFor: 'High volume practices', slug: 'fte-model' },
   ];
 
   if (loading) {
@@ -124,7 +124,7 @@ const Home = () => {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Link to="/contact" className="bg-accent hover:bg-secondary text-white px-8 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 text-center">
-                    📊 {homeContent?.cta_button || 'Get Your Free RCM Audit'} →
+                    📊 Get Your Free RCM Audit →
                   </Link>
                   <Link to="/pricing" className="bg-white/10 backdrop-blur-sm border border-white/30 hover:bg-white/20 text-white px-8 py-4 rounded-xl font-semibold transition-all text-center">
                     💰 See Pricing Models
@@ -142,12 +142,11 @@ const Home = () => {
 
               {/* Right Column - Company Logo & Branding */}
               <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/20 text-center">
-                {/* Company Logo */}
                 <div className="mb-6">
                   <img 
   src="/images/mahastar-logo.png" 
   alt="MahaStar Logo"
-  className="w-32 mx-auto mb-4"
+  className="w-256 mx-auto mb-4"
 />
                   <h2 className="text-2xl font-bold text-white mb-1">
                     MahaStar Medical Billing
@@ -159,7 +158,6 @@ const Home = () => {
                 
                 <div className="w-16 h-1 bg-accent mx-auto mb-6"></div>
                 
-                {/* Key Statistics */}
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div>
                     <div className="text-2xl font-bold text-accent">15+</div>
@@ -171,7 +169,6 @@ const Home = () => {
                   </div>
                 </div>
                 
-                {/* Trust Badges */}
                 <div className="space-y-2 text-left mb-6">
                   <div className="flex items-center gap-2 text-sm text-blue-100">
                     <CheckCircle className="w-4 h-4 text-accent" />
@@ -228,8 +225,10 @@ const Home = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {services.map((service, index) => {
               const IconComponent = iconMap[service.icon_name] || FileCheck;
+              // Use the correct dynamic route for services
+              const serviceLink = `/services/${service.slug}`;
               return (
-                <Link key={index} to={`/services/${service.slug}`} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all hover:scale-105 block">
+                <Link key={index} to={serviceLink} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all hover:scale-105 block">
                   <IconComponent className="w-14 h-14 text-primary mb-4" />
                   <h3 className="text-xl font-semibold mb-3 text-dark">{service.title}</h3>
                   <p className="text-gray-600">{service.description}</p>
@@ -268,7 +267,7 @@ const Home = () => {
                   <span>Specialty-Specific Coding Expertise</span>
                 </li>
               </ul>
-              <Link to="/about" className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-secondary transition inline-block">
+              <Link to="/company/leadership" className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-secondary transition inline-block">
                 Meet Our Team →
               </Link>
             </div>
@@ -305,7 +304,7 @@ const Home = () => {
                 <div className="text-sm text-gray-500 mb-4">
                   <span className="font-semibold">Best for:</span> {model.bestFor}
                 </div>
-                <Link to="/contact" className="block text-center bg-dark text-white py-2 rounded-lg hover:bg-primary transition">
+                <Link to="/pricing" className="block text-center bg-dark text-white py-2 rounded-lg hover:bg-primary transition">
                   Get Quote
                 </Link>
               </div>

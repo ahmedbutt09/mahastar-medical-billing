@@ -38,19 +38,18 @@ const Navbar = () => {
         { path: '/services/credentialing', label: 'Provider Credentialing' },
         { path: '/services/denial-management', label: 'Denial Management' },
         { path: '/services/telehealth', label: 'Telehealth Billing' },
-        // Software & Automation
-  { path: '/software/rcm-software', label: 'RCM Software' },
-  { path: '/automation/rcm-automation', label: 'RCM Automation' },
+        { path: '/software/rcm-software', label: 'RCM Software' },
+        { path: '/automation/rcm-automation', label: 'RCM Automation' },
         { path: '/solutions/ai-solutions', label: 'AI Solutions' },
       ]
     },
     solutions: {
       title: 'Solutions',
       links: [
-  { path: '/audience/for-hospitals', label: 'For Hospitals' },
-  { path: '/audience/for-medical-groups', label: 'For Medical Groups' },
-  { path: '/audience/for-independent-practices', label: 'For Independent Practices' },
-  { path: '/audience/for-in-house-teams', label: 'For In-House Teams' },
+        { path: '/audience/for-hospitals', label: 'For Hospitals' },
+        { path: '/audience/for-medical-groups', label: 'For Medical Groups' },
+        { path: '/audience/for-independent-practices', label: 'For Independent Practices' },
+        { path: '/audience/for-in-house-teams', label: 'For In-House Teams' },
       ]
     },
     specialties: {
@@ -87,18 +86,31 @@ const Navbar = () => {
         { path: '/payers/workers-comp', label: 'Workers Comp' },
       ]
     },
+    ehr: {
+      title: 'EHR',
+      links: [
+        { path: '/ehr/epic', label: 'Epic' },
+        { path: '/ehr/cerner', label: 'Cerner' },
+        { path: '/ehr/eclinicalworks', label: 'eClinicalWorks' },
+        { path: '/ehr/athenahealth', label: 'Athenahealth' },
+        { path: '/ehr/nextgen', label: 'NextGen' },
+        { path: '/ehr/kareo', label: 'Kareo' },
+        { path: '/ehr/practice-fusion', label: 'Practice Fusion' },
+        { path: '/ehr/allscripts', label: 'Allscripts' },
+      ]
+    },
     resources: {
       title: 'Resources',
       links: [
         { path: '/blog', label: 'Blog' },
-  { path: '/resources/whitepapers', label: 'Whitepapers' },
-  { path: '/resources/webinars', label: 'Webinars' },
-  { path: '/resources/events', label: 'Events' },
-  { path: '/resources/magazine', label: 'Magazine' },
-  { path: '/resources/faqs', label: 'FAQs' },
-  { path: '/resources/glossary', label: 'RCM Glossary' },
-  { path: '/resources/hipaa-guide', label: 'HIPAA Guide' },
-  { path: '/resources/coding-updates', label: 'Coding Updates' },
+        { path: '/resources/whitepapers', label: 'Whitepapers' },
+        { path: '/resources/webinars', label: 'Webinars' },
+        { path: '/resources/events', label: 'Events' },
+        { path: '/resources/magazine', label: 'Magazine' },
+        { path: '/resources/faqs', label: 'FAQs' },
+        { path: '/resources/glossary', label: 'RCM Glossary' },
+        { path: '/resources/hipaa-guide', label: 'HIPAA Guide' },
+        { path: '/resources/coding-updates', label: 'Coding Updates' },
       ]
     },
     company: {
@@ -168,12 +180,6 @@ const Navbar = () => {
               Case Studies
             </Link>
 
-            {/* Phone Number */}
-            <div className="ml-4 flex items-center gap-2 text-gray-600">
-              <Phone size={14} />
-              <span className="text-sm font-medium">(555) 123-4567</span>
-            </div>
-
             {/* CTA Button */}
             <Link to="/contact" className="ml-4 bg-primary text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-secondary transition">
               Get Started
@@ -225,12 +231,6 @@ const Navbar = () => {
               <Link to="/case-studies" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>Case Studies</Link>
               <Link to="/contact" className="block px-3 py-2 text-base font-medium text-white bg-primary hover:bg-secondary rounded-md text-center mt-2" onClick={() => setIsOpen(false)}>Get Started</Link>
               
-              <div className="pt-2 mt-2 border-t border-gray-200">
-                <div className="flex items-center justify-center gap-2 text-gray-600 py-2">
-                  <Phone size={14} />
-                  <span className="text-sm">(555) 123-4567</span>
-                </div>
-              </div>
             </div>
           </div>
         )}
