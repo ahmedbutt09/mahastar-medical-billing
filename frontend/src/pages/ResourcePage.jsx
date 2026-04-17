@@ -17,6 +17,12 @@ const ResourcePage = () => {
   const [selectedResource, setSelectedResource] = useState(null);
   const [formData, setFormData] = useState({ name: '', email: '', practice: '' });
   const [showModal, setShowModal] = useState(false);
+  
+  // HIPAA modal state - declared at top level (never conditionally)
+  const [hipaaModalOpen, setHipaaModalOpen] = useState(false);
+  const [hipaaSelectedResource, setHipaaSelectedResource] = useState(null);
+  const [hipaaFormData, setHipaaFormData] = useState({ name: '', email: '', practice: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchResources();
@@ -37,48 +43,87 @@ const ResourcePage = () => {
   };
 
   const handleDownload = async (e) => {
-  e.preventDefault();
-  
-  // Determine the URL to open (prefer file_url, then pdf_url)
-  const downloadUrl = selectedResource.file_url || selectedResource.pdf_url;
-  
-  if (!downloadUrl) {
-    alert('Error: PDF URL not found. Please contact support.');
-    return;
-  }
-  
-  try {
-    // Track download in database
-    await api.post(`/api/resource/${selectedResource.id}/download`, {
-      name: formData.name,
-      email: formData.email,
-      practice: formData.practice,
-      resource_type: selectedResource.resource_type
-    });
+    e.preventDefault();
     
-    alert(`Thank you ${formData.name}! The ${selectedResource.title} will open in a new tab.`);
+    const downloadUrl = selectedResource.file_url || selectedResource.pdf_url;
     
-    // Open PDF in new tab
-    window.open(downloadUrl, '_blank');
+    if (!downloadUrl) {
+      alert('Error: PDF URL not found. Please contact support.');
+      return;
+    }
     
-    // Reset form and close modal
-    setFormData({ name: '', email: '', practice: '' });
-    setShowModal(false);
-    setSelectedResource(null);
+    try {
+      await api.post(`/api/resource/${selectedResource.id}/download`, {
+        name: formData.name,
+        email: formData.email,
+        practice: formData.practice,
+        resource_type: selectedResource.resource_type
+      });
+      
+      alert(`Thank you ${formData.name}! The ${selectedResource.title} will open in a new tab.`);
+      window.open(downloadUrl, '_blank');
+      setFormData({ name: '', email: '', practice: '' });
+      setShowModal(false);
+      setSelectedResource(null);
+      
+    } catch (error) {
+      console.error('Download error:', error);
+      window.open(downloadUrl, '_blank');
+      setShowModal(false);
+      setSelectedResource(null);
+    }
+  };
+
+  const openDownloadModal = (resource) => {
+    console.log('Opening modal for resource:', resource);
+    setSelectedResource(resource);
+    setShowModal(true);
+  };
+
+  // HIPAA modal functions
+  const openHipaaModal = (resource) => {
+    console.log('Opening HIPAA modal for:', resource);
+    setHipaaSelectedResource(resource);
+    setHipaaModalOpen(true);
+  };
+
+  const closeHipaaModal = () => {
+    setHipaaModalOpen(false);
+    setHipaaSelectedResource(null);
+    setHipaaFormData({ name: '', email: '', practice: '' });
+    setIsSubmitting(false);
+  };
+
+  const handleHipaaDownload = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
     
-  } catch (error) {
-    console.error('Download error:', error);
-    // Still try to open the PDF even if tracking fails
-    window.open(downloadUrl, '_blank');
-    setShowModal(false);
-    setSelectedResource(null);
-  }
-};
-const openDownloadModal = (resource) => {
-  console.log('Opening modal for resource:', resource);
-  setSelectedResource(resource);
-  setShowModal(true);
-};
+    const downloadUrl = hipaaSelectedResource?.file_url || hipaaSelectedResource?.pdf_url;
+    
+    if (!downloadUrl) {
+      alert('Error: PDF URL not found. Please contact support.');
+      setIsSubmitting(false);
+      return;
+    }
+    
+    try {
+      await api.post(`/api/resource/${hipaaSelectedResource.id}/download`, {
+        name: hipaaFormData.name,
+        email: hipaaFormData.email,
+        practice: hipaaFormData.practice,
+        resource_type: hipaaSelectedResource.resource_type
+      });
+      
+      alert(`Thank you ${hipaaFormData.name}! The document will open in a new tab.`);
+      window.open(downloadUrl, '_blank');
+      closeHipaaModal();
+      
+    } catch (error) {
+      console.error('Download error:', error);
+      window.open(downloadUrl, '_blank');
+      closeHipaaModal();
+    }
+  };
 
   const getIcon = () => {
     switch(type) {
@@ -186,6 +231,58 @@ const openDownloadModal = (resource) => {
             Request Custom Research
           </Link>
         </section>
+        
+        {/* Modal for whitepapers */}
+        {showModal && selectedResource && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl max-w-md w-full mx-4 p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold text-dark">Download {selectedResource.title}</h3>
+                <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">
+                  <X size={24} />
+                </button>
+              </div>
+              <form onSubmit={handleDownload}>
+                <input
+                  type="text"
+                  placeholder="Full Name *"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-3 focus:ring-primary focus:border-primary"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                />
+                <input
+                  type="email"
+                  placeholder="Email Address *"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-3 focus:ring-primary focus:border-primary"
+                  required
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                />
+                <input
+                  type="text"
+                  placeholder="Practice Name"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4 focus:ring-primary focus:border-primary"
+                  value={formData.practice}
+                  onChange={(e) => setFormData({...formData, practice: e.target.value})}
+                />
+                <button
+                  type="submit"
+                  className="w-full bg-primary text-white py-2 rounded-lg hover:bg-secondary transition"
+                >
+                  Download Now
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="w-full text-gray-500 mt-2 hover:text-gray-700"
+                >
+                  Cancel
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -352,6 +449,58 @@ const openDownloadModal = (resource) => {
             </div>
           </div>
         </section>
+        
+        {/* Modal for magazine */}
+        {showModal && selectedResource && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl max-w-md w-full mx-4 p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold text-dark">Download {selectedResource.title}</h3>
+                <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">
+                  <X size={24} />
+                </button>
+              </div>
+              <form onSubmit={handleDownload}>
+                <input
+                  type="text"
+                  placeholder="Full Name *"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-3 focus:ring-primary focus:border-primary"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                />
+                <input
+                  type="email"
+                  placeholder="Email Address *"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-3 focus:ring-primary focus:border-primary"
+                  required
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                />
+                <input
+                  type="text"
+                  placeholder="Practice Name"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4 focus:ring-primary focus:border-primary"
+                  value={formData.practice}
+                  onChange={(e) => setFormData({...formData, practice: e.target.value})}
+                />
+                <button
+                  type="submit"
+                  className="w-full bg-primary text-white py-2 rounded-lg hover:bg-secondary transition"
+                >
+                  Download Now
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="w-full text-gray-500 mt-2 hover:text-gray-700"
+                >
+                  Cancel
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -500,201 +649,151 @@ const openDownloadModal = (resource) => {
     );
   }
 
-// ============ HIPAA COMPLIANCE GUIDE ============
-if (type === 'hipaa-guide') {
-  // Local state for modal inside this section
-  const [localModalOpen, setLocalModalOpen] = useState(false);
-  const [localSelectedResource, setLocalSelectedResource] = useState(null);
-  const [localFormData, setLocalFormData] = useState({ name: '', email: '', practice: '' });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // ============ HIPAA COMPLIANCE GUIDE ============
+  if (type === 'hipaa-guide') {
+    return (
+      <div className="pt-24 pb-16">
+        <section className="bg-gradient-to-r from-dark to-primary text-white py-20">
+          <div className="max-w-7xl mx-auto px-4 text-center">
+            {getIcon()}
+            <h1 className="text-5xl font-bold mb-4">{getTitle()}</h1>
+            <p className="text-xl text-blue-100 max-w-3xl mx-auto">{getSubtitle()}</p>
+          </div>
+        </section>
 
-  const openModal = (resource) => {
-    console.log('Opening modal for:', resource);
-    setLocalSelectedResource(resource);
-    setLocalModalOpen(true);
-  };
+        <section className="py-16">
+          <div className="max-w-4xl mx-auto px-4">
+            {resources.map(guide => (
+              <div key={guide.id}>
+                <div className="bg-blue-50 rounded-xl p-6 mb-8">
+                  <h2 className="text-2xl font-bold text-dark mb-4">Your HIPAA Compliance Partner</h2>
+                  <p className="text-gray-700 mb-4">
+                    MahaStar is fully HIPAA compliant, SOC2 Type II audited, and VAPT certified. 
+                    We sign Business Associate Agreements (BAA) with all clients and maintain 
+                    enterprise-grade security controls.
+                  </p>
+                  <div className="flex flex-wrap gap-4">
+                    <span className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full text-sm">
+                      <Shield className="w-4 h-4 text-primary" /> HIPAA Compliant
+                    </span>
+                    <span className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full text-sm">
+                      <Shield className="w-4 h-4 text-primary" /> SOC2 Type II
+                    </span>
+                    <span className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full text-sm">
+                      <Shield className="w-4 h-4 text-primary" /> VAPT Audited
+                    </span>
+                  </div>
+                </div>
 
-  const closeModal = () => {
-    setLocalModalOpen(false);
-    setLocalSelectedResource(null);
-    setLocalFormData({ name: '', email: '', practice: '' });
-    setIsSubmitting(false);
-  };
+                <div 
+                  className="prose prose-lg max-w-none mb-8"
+                  dangerouslySetInnerHTML={{ __html: guide.content || '' }}
+                />
 
-  const handleLocalDownload = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    const downloadUrl = localSelectedResource.file_url || localSelectedResource.pdf_url;
-    
-    if (!downloadUrl) {
-      alert('Error: PDF URL not found. Please contact support.');
-      setIsSubmitting(false);
-      return;
-    }
-    
-    try {
-      await api.post(`/api/resource/${localSelectedResource.id}/download`, {
-        name: localFormData.name,
-        email: localFormData.email,
-        practice: localFormData.practice,
-        resource_type: localSelectedResource.resource_type
-      });
-      
-      alert(`Thank you ${localFormData.name}! The document will open in a new tab.`);
-      window.open(downloadUrl, '_blank');
-      closeModal();
-      
-    } catch (error) {
-      console.error('Download error:', error);
-      window.open(downloadUrl, '_blank');
-      closeModal();
-    }
-  };
-
-  return (
-    <div className="pt-24 pb-16">
-      <section className="bg-gradient-to-r from-dark to-primary text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          {getIcon()}
-          <h1 className="text-5xl font-bold mb-4">{getTitle()}</h1>
-          <p className="text-xl text-blue-100 max-w-3xl mx-auto">{getSubtitle()}</p>
-        </div>
-      </section>
-
-      <section className="py-16">
-        <div className="max-w-4xl mx-auto px-4">
-          {resources.map(guide => (
-            <div key={guide.id}>
-              <div className="bg-blue-50 rounded-xl p-6 mb-8">
-                <h2 className="text-2xl font-bold text-dark mb-4">Your HIPAA Compliance Partner</h2>
-                <p className="text-gray-700 mb-4">
-                  MahaStar is fully HIPAA compliant, SOC2 Type II audited, and VAPT certified. 
-                  We sign Business Associate Agreements (BAA) with all clients and maintain 
-                  enterprise-grade security controls.
-                </p>
-                <div className="flex flex-wrap gap-4">
-                  <span className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full text-sm">
-                    <Shield className="w-4 h-4 text-primary" /> HIPAA Compliant
-                  </span>
-                  <span className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full text-sm">
-                    <Shield className="w-4 h-4 text-primary" /> SOC2 Type II
-                  </span>
-                  <span className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full text-sm">
-                    <Shield className="w-4 h-4 text-primary" /> VAPT Audited
-                  </span>
+                <div className="bg-gray-50 rounded-xl p-6 text-center">
+                  <FileText className="w-12 h-12 text-primary mx-auto mb-3" />
+                  <h3 className="text-xl font-bold text-dark mb-2">Download Full Compliance Guide</h3>
+                  <p className="text-gray-600 mb-4">Get our complete 24-page HIPAA compliance guide for medical practices.</p>
+                  <button 
+                    onClick={() => openHipaaModal(guide)}
+                    className="bg-primary text-white px-6 py-2 rounded-lg inline-flex items-center gap-2 hover:bg-secondary transition"
+                  >
+                    <Download size={16} /> Download PDF
+                  </button>
                 </div>
               </div>
-
-              <div 
-                className="prose prose-lg max-w-none mb-8"
-                dangerouslySetInnerHTML={{ __html: guide.content || '' }}
-              />
-
-              <div className="bg-gray-50 rounded-xl p-6 text-center">
-                <FileText className="w-12 h-12 text-primary mx-auto mb-3" />
-                <h3 className="text-xl font-bold text-dark mb-2">Download Full Compliance Guide</h3>
-                <p className="text-gray-600 mb-4">Get our complete 24-page HIPAA compliance guide for medical practices.</p>
-                <button 
-                  onClick={() => openModal(guide)}
-                  className="bg-primary text-white px-6 py-2 rounded-lg inline-flex items-center gap-2 hover:bg-secondary transition"
-                >
-                  <Download size={16} /> Download PDF
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="bg-primary text-white py-16 text-center">
-        <Link to="/contact" className="bg-accent px-8 py-3 rounded-lg font-semibold inline-block hover:bg-secondary transition">
-          Request Compliance Consultation
-        </Link>
-      </section>
-
-      {/* Modal - INSIDE the HIPAA section */}
-      {localModalOpen && localSelectedResource && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
-          <div className="bg-white rounded-xl max-w-md w-full mx-4 p-6 relative">
-            <button 
-              onClick={closeModal}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
-            >
-              ×
-            </button>
-            
-            <div className="text-center mb-4">
-              <FileText className="w-12 h-12 text-primary mx-auto mb-2" />
-              <h3 className="text-xl font-bold text-dark">Download HIPAA Guide</h3>
-              <p className="text-gray-600 text-sm mt-1">Please provide your information to download</p>
-            </div>
-            
-            <form onSubmit={handleLocalDownload} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Full Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary focus:border-primary"
-                  value={localFormData.name}
-                  onChange={(e) => setLocalFormData({...localFormData, name: e.target.value})}
-                  placeholder="Dr. John Smith"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email Address <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="email"
-                  required
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary focus:border-primary"
-                  value={localFormData.email}
-                  onChange={(e) => setLocalFormData({...localFormData, email: e.target.value})}
-                  placeholder="john@practice.com"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Practice Name
-                </label>
-                <input
-                  type="text"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary focus:border-primary"
-                  value={localFormData.practice}
-                  onChange={(e) => setLocalFormData({...localFormData, practice: e.target.value})}
-                  placeholder="Cardiology Associates"
-                />
-              </div>
-              
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-secondary transition disabled:opacity-50"
-                >
-                  {isSubmitting ? 'Processing...' : 'Download PDF'}
-                </button>
-              </div>
-            </form>
+            ))}
           </div>
-        </div>
-      )}
-    </div>
-  );
-}
+        </section>
+
+        <section className="bg-primary text-white py-16 text-center">
+          <Link to="/contact" className="bg-accent px-8 py-3 rounded-lg font-semibold inline-block hover:bg-secondary transition">
+            Request Compliance Consultation
+          </Link>
+        </section>
+
+        {/* HIPAA Modal */}
+        {hipaaModalOpen && hipaaSelectedResource && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
+            <div className="bg-white rounded-xl max-w-md w-full mx-4 p-6 relative">
+              <button 
+                onClick={closeHipaaModal}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
+              >
+                ×
+              </button>
+              
+              <div className="text-center mb-4">
+                <FileText className="w-12 h-12 text-primary mx-auto mb-2" />
+                <h3 className="text-xl font-bold text-dark">Download HIPAA Guide</h3>
+                <p className="text-gray-600 text-sm mt-1">Please provide your information to download</p>
+              </div>
+              
+              <form onSubmit={handleHipaaDownload} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Full Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary focus:border-primary"
+                    value={hipaaFormData.name}
+                    onChange={(e) => setHipaaFormData({...hipaaFormData, name: e.target.value})}
+                    placeholder="Dr. John Smith"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email Address <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary focus:border-primary"
+                    value={hipaaFormData.email}
+                    onChange={(e) => setHipaaFormData({...hipaaFormData, email: e.target.value})}
+                    placeholder="john@practice.com"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Practice Name
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary focus:border-primary"
+                    value={hipaaFormData.practice}
+                    onChange={(e) => setHipaaFormData({...hipaaFormData, practice: e.target.value})}
+                    placeholder="Cardiology Associates"
+                  />
+                </div>
+                
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={closeHipaaModal}
+                    className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-secondary transition disabled:opacity-50"
+                  >
+                    {isSubmitting ? 'Processing...' : 'Download PDF'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   // ============ CODING UPDATES ============
   if (type === 'coding-updates') {
@@ -744,60 +843,15 @@ if (type === 'hipaa-guide') {
     );
   }
 
-  // Download Modal
+  // Fallback for unknown resource types
   return (
-    <>
-      {showModal && selectedResource && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl max-w-md w-full mx-4 p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-dark">Download {selectedResource.title}</h3>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">
-                <X size={24} />
-              </button>
-            </div>
-            <form onSubmit={handleDownload}>
-              <input
-                type="text"
-                placeholder="Full Name *"
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-3 focus:ring-primary focus:border-primary"
-                required
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-              />
-              <input
-                type="email"
-                placeholder="Email Address *"
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-3 focus:ring-primary focus:border-primary"
-                required
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-              />
-              <input
-                type="text"
-                placeholder="Practice Name"
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4 focus:ring-primary focus:border-primary"
-                value={formData.practice}
-                onChange={(e) => setFormData({...formData, practice: e.target.value})}
-              />
-              <button
-                type="submit"
-                className="w-full bg-primary text-white py-2 rounded-lg hover:bg-secondary transition"
-              >
-                Download Now
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                className="w-full text-gray-500 mt-2 hover:text-gray-700"
-              >
-                Cancel
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-    </>
+    <div className="pt-24 pb-16 text-center">
+      <h1 className="text-4xl font-bold text-dark mb-4">Resource Not Found</h1>
+      <p className="text-gray-600 mb-8">The requested resource type "{type}" does not exist.</p>
+      <Link to="/" className="bg-primary text-white px-6 py-2 rounded-lg inline-block">
+        Return Home
+      </Link>
+    </div>
   );
 };
 
