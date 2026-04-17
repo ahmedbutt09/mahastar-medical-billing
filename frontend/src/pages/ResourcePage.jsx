@@ -502,6 +502,56 @@ const openDownloadModal = (resource) => {
 
 // ============ HIPAA COMPLIANCE GUIDE ============
 if (type === 'hipaa-guide') {
+  // Local state for modal inside this section
+  const [localModalOpen, setLocalModalOpen] = useState(false);
+  const [localSelectedResource, setLocalSelectedResource] = useState(null);
+  const [localFormData, setLocalFormData] = useState({ name: '', email: '', practice: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const openModal = (resource) => {
+    console.log('Opening modal for:', resource);
+    setLocalSelectedResource(resource);
+    setLocalModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setLocalModalOpen(false);
+    setLocalSelectedResource(null);
+    setLocalFormData({ name: '', email: '', practice: '' });
+    setIsSubmitting(false);
+  };
+
+  const handleLocalDownload = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    const downloadUrl = localSelectedResource.file_url || localSelectedResource.pdf_url;
+    
+    if (!downloadUrl) {
+      alert('Error: PDF URL not found. Please contact support.');
+      setIsSubmitting(false);
+      return;
+    }
+    
+    try {
+      await api.post(`/api/resource/${localSelectedResource.id}/download`, {
+        name: localFormData.name,
+        email: localFormData.email,
+        practice: localFormData.practice,
+        resource_type: localSelectedResource.resource_type
+      });
+      
+      alert(`Thank you ${localFormData.name}! The document will open in a new tab.`);
+      window.open(downloadUrl, '_blank');
+      closeModal();
+      
+    } catch (error) {
+      console.error('Download error:', error);
+      window.open(downloadUrl, '_blank');
+      closeModal();
+    }
+  };
+
   return (
     <div className="pt-24 pb-16">
       <section className="bg-gradient-to-r from-dark to-primary text-white py-20">
@@ -545,13 +595,8 @@ if (type === 'hipaa-guide') {
                 <FileText className="w-12 h-12 text-primary mx-auto mb-3" />
                 <h3 className="text-xl font-bold text-dark mb-2">Download Full Compliance Guide</h3>
                 <p className="text-gray-600 mb-4">Get our complete 24-page HIPAA compliance guide for medical practices.</p>
-                {/* Debug info - remove after testing */}
-                <p className="text-xs text-gray-400 mb-2">PDF URL: {guide.file_url || 'Not set'}</p>
                 <button 
-                  onClick={() => {
-                    console.log('Guide data:', guide);
-                    openDownloadModal(guide);
-                  }}
+                  onClick={() => openModal(guide)}
                   className="bg-primary text-white px-6 py-2 rounded-lg inline-flex items-center gap-2 hover:bg-secondary transition"
                 >
                   <Download size={16} /> Download PDF
@@ -567,6 +612,86 @@ if (type === 'hipaa-guide') {
           Request Compliance Consultation
         </Link>
       </section>
+
+      {/* Modal - INSIDE the HIPAA section */}
+      {localModalOpen && localSelectedResource && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
+          <div className="bg-white rounded-xl max-w-md w-full mx-4 p-6 relative">
+            <button 
+              onClick={closeModal}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
+            >
+              ×
+            </button>
+            
+            <div className="text-center mb-4">
+              <FileText className="w-12 h-12 text-primary mx-auto mb-2" />
+              <h3 className="text-xl font-bold text-dark">Download HIPAA Guide</h3>
+              <p className="text-gray-600 text-sm mt-1">Please provide your information to download</p>
+            </div>
+            
+            <form onSubmit={handleLocalDownload} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Full Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary focus:border-primary"
+                  value={localFormData.name}
+                  onChange={(e) => setLocalFormData({...localFormData, name: e.target.value})}
+                  placeholder="Dr. John Smith"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email Address <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  required
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary focus:border-primary"
+                  value={localFormData.email}
+                  onChange={(e) => setLocalFormData({...localFormData, email: e.target.value})}
+                  placeholder="john@practice.com"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Practice Name
+                </label>
+                <input
+                  type="text"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary focus:border-primary"
+                  value={localFormData.practice}
+                  onChange={(e) => setLocalFormData({...localFormData, practice: e.target.value})}
+                  placeholder="Cardiology Associates"
+                />
+              </div>
+              
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-secondary transition disabled:opacity-50"
+                >
+                  {isSubmitting ? 'Processing...' : 'Download PDF'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
