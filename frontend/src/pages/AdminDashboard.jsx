@@ -138,13 +138,11 @@ const AdminDashboard = () => {
           md:translate-x-0 md:block
           shadow-xl
         `}>
-          {/* Sidebar Header */}
           <div className="p-6 border-b border-white/10">
             <h1 className="text-xl font-bold">MahaStar Admin</h1>
             <p className="text-xs text-gray-400 mt-1">Content Management System</p>
           </div>
           
-          {/* Mobile Close Button */}
           <button 
             onClick={() => setSidebarOpen(false)}
             className="absolute top-4 right-4 text-gray-400 hover:text-white md:hidden"
@@ -152,7 +150,6 @@ const AdminDashboard = () => {
             <CloseIcon size={24} />
           </button>
           
-          {/* Navigation */}
           <nav className="p-4 space-y-1 pb-24">
             {menuItems.map((item) => (
               <button
@@ -180,7 +177,6 @@ const AdminDashboard = () => {
             ))}
           </nav>
           
-          {/* Logout Button */}
           <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10 bg-dark">
             <button
               onClick={handleLogout}
@@ -195,7 +191,6 @@ const AdminDashboard = () => {
         {/* Main Content */}
         <main className="flex-1 min-h-screen">
           <div className="p-4 md:p-8">
-            {/* Overview Tab */}
             {activeTab === 'overview' && (
               <>
                 <div className="mb-6">
@@ -203,7 +198,6 @@ const AdminDashboard = () => {
                   <p className="text-gray-500 mt-1">Welcome back! Here's what's happening with your website.</p>
                 </div>
                 
-                {/* Stats Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
                   <div className="bg-white rounded-xl shadow-md p-4 md:p-6">
                     <div className="flex items-center justify-between">
@@ -247,7 +241,6 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                {/* Recent Contacts */}
                 <div className="bg-white rounded-xl shadow-md overflow-hidden">
                   <div className="p-4 md:p-6 border-b bg-gray-50">
                     <h2 className="text-lg md:text-xl font-bold text-dark">Recent Contacts</h2>
@@ -286,7 +279,6 @@ const AdminDashboard = () => {
               </>
             )}
 
-            {/* Other Tabs */}
             {activeTab === 'contacts' && <ContactsManager />}
             {activeTab === 'subscribers' && <SubscribersManager />}
             {activeTab === 'chat' && <ChatCallbacksManager />}

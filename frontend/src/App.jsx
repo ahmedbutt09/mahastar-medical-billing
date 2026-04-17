@@ -5,29 +5,30 @@ import { useEffect } from 'react';
 import { trackPageView } from './utils/analytics';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute';
-
-// Main pages
+import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
 import Services from './pages/Services';
 import Contact from './pages/Contact';
 import About from './pages/About';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
+import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
 import Pricing from './pages/Pricing';
 import CaseStudies from './pages/CaseStudies';
-
-// Dynamic page
 import DynamicPage from './pages/DynamicPage';
+import ResourcePage from './pages/ResourcePage';
 
 // Listing pages
 import Payers from './pages/Payers';
 import Specialties from './pages/Specialties';
 import Resources from './pages/Resources';
 
-// Static pages
+// Static pages (unique layouts)
 import AISolutions from './pages/ai/AISolutions';
+import RCMSoftware from './pages/software/RCMSoftware';
+import RCMServices from './pages/automation/RCMServices';
 import Events from './pages/resources/Events';
 import Magazine from './pages/resources/Magazine';
 import Whitepapers from './pages/resources/Whitepapers';
@@ -43,16 +44,9 @@ import ForHospitals from './pages/audience/ForHospitals';
 import ForMedicalGroups from './pages/audience/ForMedicalGroups';
 import ForIndependentPractices from './pages/audience/ForIndependentPractices';
 import ForInHouseTeams from './pages/audience/ForInHouseTeams';
-import ResourcePage from './pages/ResourcePage';
-
-// Admin pages (NO navbar/footer)
-import AdminLogin from './pages/AdminLogin';
-import AdminDashboard from './pages/AdminDashboard';
-
 import ChatBot from './components/ChatBot';
 
-// Main layout component with navbar and footer
-const MainLayout = () => {
+const AppContent = () => {
   const location = useLocation();
 
   useEffect(() => {
@@ -64,12 +58,19 @@ const MainLayout = () => {
       <Navbar />
       <main className="flex-grow">
         <Routes>
+          {/* Main pages */}
           <Route path="/" element={<Home />} />
           <Route path="/services" element={<Services />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/case-studies" element={<CaseStudies />} />
           
@@ -78,19 +79,23 @@ const MainLayout = () => {
           <Route path="/specialties" element={<Specialties />} />
           <Route path="/resources" element={<Resources />} />
           
-          {/* Dynamic routes */}
+          {/* Dynamic routes - content from database */}
           <Route path="/services/:slug" element={<DynamicPage />} />
           <Route path="/specialties/:slug" element={<DynamicPage />} />
           <Route path="/payers/:slug" element={<DynamicPage />} />
           <Route path="/ehr/:slug" element={<DynamicPage />} />
           <Route path="/software/:slug" element={<DynamicPage />} />
           <Route path="/automation/:slug" element={<DynamicPage />} />
+          <Route path="/solutions/:slug" element={<DynamicPage />} />
+          <Route path="/audience/:slug" element={<DynamicPage />} />
           
-          {/* Resource routes */}
+          {/* Resource page (dynamic for all resource types) */}
           <Route path="/resources/:type" element={<ResourcePage />} />
           
           {/* Static unique pages */}
           <Route path="/ai-solutions" element={<AISolutions />} />
+          <Route path="/rcm-software" element={<RCMSoftware />} />
+          <Route path="/rcm-automation" element={<RCMServices />} />
           <Route path="/events" element={<Events />} />
           <Route path="/magazine" element={<Magazine />} />
           <Route path="/resources/whitepapers" element={<Whitepapers />} />
@@ -109,23 +114,9 @@ const MainLayout = () => {
         </Routes>
       </main>
       <Footer />
-      <ChatBot />
       <Toaster position="top-right" />
+      <ChatBot />
     </div>
-  );
-};
-
-// Admin layout component - NO navbar, NO footer
-const AdminLayout = () => {
-  return (
-    <Routes>
-      <Route path="/admin" element={<AdminLogin />} />
-      <Route path="/admin/dashboard" element={
-        <ProtectedRoute>
-          <AdminDashboard />
-        </ProtectedRoute>
-      } />
-    </Routes>
   );
 };
 
@@ -133,13 +124,7 @@ function App() {
   return (
     <Router>
       <ScrollToTop />
-      <Routes>
-        {/* Admin routes - completely separate, no navbar/footer */}
-        <Route path="/admin/*" element={<AdminLayout />} />
-        
-        {/* Main website routes - with navbar/footer */}
-        <Route path="/*" element={<MainLayout />} />
-      </Routes>
+      <AppContent />
     </Router>
   );
 }
