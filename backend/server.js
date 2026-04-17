@@ -1585,6 +1585,68 @@ app.get('/api/dynamic-pages/summary', async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+// ============= UNIFIED RESOURCES ENDPOINTS =============
+
+// Get resources by type
+app.get('/api/resources/:type', async (req, res) => {
+  try {
+    const { type } = req.params;
+    const { data, error } = await supabaseAdmin
+      .from('resources')
+      .select('*')
+      .eq('resource_type', type)
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true });
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error fetching resources:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get single resource by slug
+app.get('/api/resource/:slug', async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const { data, error } = await supabaseAdmin
+      .from('resources')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Track resource download
+app.post('/api/resource/:id/download', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email, practice, resource_type } = req.body;
+    
+    const { error } = await supabaseAdmin
+      .from('resource_downloads')
+      .insert([{ resource_id: id, resource_type, name, email, practice }]);
+    
+    if (error) throw error;
+    
+    // Increment download count
+    await supabaseAdmin
+      .from('resources')
+      .update({ download_count: supabaseAdmin.rpc('increment', { x: 1 }) })
+      .eq('id', id);
+    
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Error tracking download:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 // A simple health check to test if the backend is alive
 // Health check for Vercel testing
 app.get('/api/health', (req, res) => {

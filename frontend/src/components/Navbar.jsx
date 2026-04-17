@@ -91,12 +91,14 @@ const Navbar = () => {
       title: 'Resources',
       links: [
         { path: '/blog', label: 'Blog' },
-        { path: '/resources/whitepapers', label: 'Whitepapers' },
-        { path: '/resources/webinars', label: 'Webinars' },
-        { path: '/resources/faqs', label: 'FAQs' },
-        { path: '/resources/glossary', label: 'RCM Glossary' },
-        { path: '/events', label: 'Events' },
-        { path: '/magazine', label: 'Magazine' },
+  { path: '/resources/whitepapers', label: 'Whitepapers' },
+  { path: '/resources/webinars', label: 'Webinars' },
+  { path: '/resources/events', label: 'Events' },
+  { path: '/resources/magazine', label: 'Magazine' },
+  { path: '/resources/faqs', label: 'FAQs' },
+  { path: '/resources/glossary', label: 'RCM Glossary' },
+  { path: '/resources/hipaa-guide', label: 'HIPAA Guide' },
+  { path: '/resources/coding-updates', label: 'Coding Updates' },
       ]
     },
     company: {
