@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { 
   FileText, Video, Calendar, BookOpen, HelpCircle, Book, 
   Shield, AlertCircle, Download, Play, CheckCircle, Search, 
-  ChevronDown, ChevronUp, MapPin, Clock, Users, X
+  ChevronDown, ChevronUp, MapPin, Clock, Users, X, Eye
 } from 'lucide-react';
 import api from '../api';
 
@@ -50,9 +50,8 @@ const ResourcePage = () => {
       setShowModal(false);
       setSelectedResource(null);
       
-      // Open the actual PDF in new tab
-      if (selectedResource.file_url) {
-        window.open(selectedResource.file_url, '_blank');
+      if (selectedResource.file_url || selectedResource.pdf_url) {
+        window.open(selectedResource.file_url || selectedResource.pdf_url, '_blank');
       }
     } catch (error) {
       alert('Error processing request. Please try again.');
@@ -114,7 +113,7 @@ const ResourcePage = () => {
     );
   }
 
-  // Render Whitepapers
+  // ============ WHITEPAPERS ============
   if (type === 'whitepapers') {
     return (
       <div className="pt-24 pb-16">
@@ -164,11 +163,17 @@ const ResourcePage = () => {
             </div>
           </div>
         </section>
+
+        <section className="bg-primary text-white py-16 text-center">
+          <Link to="/contact" className="bg-accent px-8 py-3 rounded-lg font-semibold inline-block hover:bg-secondary transition">
+            Request Custom Research
+          </Link>
+        </section>
       </div>
     );
   }
 
-  // Render Webinars
+  // ============ WEBINARS ============
   if (type === 'webinars') {
     const upcoming = resources.filter(w => w.webinar_status === 'upcoming');
     const recorded = resources.filter(w => w.webinar_status === 'recorded');
@@ -215,14 +220,23 @@ const ResourcePage = () => {
                 <h2 className="text-3xl font-bold text-dark mb-8">Recorded Webinars</h2>
                 <div className="grid md:grid-cols-2 gap-6">
                   {recorded.map(webinar => (
-                    <div key={webinar.id} className="bg-gray-50 rounded-xl p-6">
-                      <Play className="w-4 h-4 text-primary mb-2" />
-                      <h3 className="text-lg font-bold mb-1">{webinar.title}</h3>
-                      <p className="text-gray-600 text-sm mb-2">{webinar.speaker}</p>
-                      <p className="text-gray-400 text-xs">{webinar.webinar_date}</p>
-                      <button className="text-primary font-medium mt-3 hover:underline">
-                        Watch Recording →
-                      </button>
+                    <div key={webinar.id} className="bg-gray-50 rounded-xl p-6 hover:shadow-md transition">
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                          <Play className="w-6 h-6 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-bold mb-1">{webinar.title}</h3>
+                          <p className="text-gray-600 text-sm mb-2">{webinar.speaker}</p>
+                          <div className="flex items-center gap-3 text-xs text-gray-400">
+                            <span>{webinar.webinar_date}</span>
+                            <span>{webinar.duration} min</span>
+                          </div>
+                          <button className="text-primary font-medium mt-3 hover:underline flex items-center gap-1">
+                            Watch Recording → <Eye size={14} />
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -230,11 +244,17 @@ const ResourcePage = () => {
             )}
           </div>
         </section>
+
+        <section className="bg-primary text-white py-16 text-center">
+          <Link to="/contact" className="bg-accent px-8 py-3 rounded-lg font-semibold inline-block hover:bg-secondary transition">
+            Suggest a Webinar Topic
+          </Link>
+        </section>
       </div>
     );
   }
 
-  // Render Events
+  // ============ EVENTS ============
   if (type === 'events') {
     return (
       <div className="pt-24 pb-16">
@@ -249,18 +269,23 @@ const ResourcePage = () => {
         <section className="py-16">
           <div className="max-w-4xl mx-auto px-4">
             {resources.map(event => (
-              <div key={event.id} className="bg-white rounded-xl shadow-md p-6 mb-4">
-                <div className="flex flex-wrap justify-between items-center">
-                  <div>
-                    <div className="text-primary font-bold">{event.event_date}</div>
-                    <h3 className="text-xl font-bold text-dark">{event.title}</h3>
-                    <div className="flex gap-4 mt-2 text-gray-500 text-sm">
-                      <span><MapPin size={14} className="inline mr-1" />{event.location}</span>
-                      <span><Users size={14} className="inline mr-1" />{event.event_type}</span>
+              <div key={event.id} className="bg-white rounded-xl shadow-md p-6 mb-4 hover:shadow-lg transition">
+                <div className="flex flex-wrap justify-between items-start gap-4">
+                  <div className="flex-1">
+                    <div className="inline-block bg-primary/10 text-primary text-sm px-3 py-1 rounded-full mb-3">
+                      {event.event_type}
                     </div>
-                    <p className="text-gray-600 mt-2">{event.description}</p>
+                    <h3 className="text-xl font-bold text-dark mb-2">{event.title}</h3>
+                    <p className="text-gray-600 mb-3">{event.description}</p>
+                    <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                      <span className="flex items-center gap-1"><Calendar size={14} />{event.event_date}</span>
+                      <span className="flex items-center gap-1"><MapPin size={14} />{event.location}</span>
+                    </div>
                   </div>
-                  <Link to={event.registration_link || '/contact'} className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition">
+                  <Link 
+                    to={event.registration_link || '/contact'} 
+                    className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary transition whitespace-nowrap"
+                  >
                     Register →
                   </Link>
                 </div>
@@ -272,7 +297,49 @@ const ResourcePage = () => {
     );
   }
 
-  // Render FAQs
+  // ============ MAGAZINE ============
+  if (type === 'magazine') {
+    return (
+      <div className="pt-24 pb-16">
+        <section className="bg-gradient-to-r from-dark to-primary text-white py-20">
+          <div className="max-w-7xl mx-auto px-4 text-center">
+            {getIcon()}
+            <h1 className="text-5xl font-bold mb-4">{getTitle()}</h1>
+            <p className="text-xl text-blue-100 max-w-3xl mx-auto">{getSubtitle()}</p>
+          </div>
+        </section>
+
+        <section className="py-16">
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {resources.map(issue => (
+                <div key={issue.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition">
+                  <div className="bg-gradient-to-br from-primary/20 to-primary/5 h-48 flex items-center justify-center">
+                    <BookOpen className="w-20 h-20 text-primary" />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-dark mb-2">{issue.title}</h3>
+                    <p className="text-gray-600 text-sm mb-3">{issue.description}</p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">{issue.article_count} articles</span>
+                      <button 
+                        onClick={() => openDownloadModal(issue)}
+                        className="text-primary font-semibold hover:underline flex items-center gap-1"
+                      >
+                        Read Issue → <Eye size={14} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  // ============ FAQS ============
   if (type === 'faqs') {
     const categories = [...new Set(resources.map(f => f.faq_category))];
     const filteredFaqs = resources.filter(faq => 
@@ -299,7 +366,7 @@ const ResourcePage = () => {
                 placeholder="Search FAQs..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-primary focus:border-primary"
               />
             </div>
 
@@ -311,7 +378,7 @@ const ResourcePage = () => {
                 <div key={category} className="mb-8">
                   <h2 className="text-2xl font-bold text-dark mb-4">{category}</h2>
                   <div className="space-y-3">
-                    {categoryFaqs.map((faq, idx) => {
+                    {categoryFaqs.map((faq) => {
                       const isOpen = openFaq === faq.id;
                       return (
                         <div key={faq.id} className="border border-gray-200 rounded-xl overflow-hidden">
@@ -334,19 +401,31 @@ const ResourcePage = () => {
                 </div>
               );
             })}
+
+            <div className="bg-primary/10 rounded-xl p-8 text-center mt-8">
+              <h3 className="text-xl font-bold text-dark mb-2">Still have questions?</h3>
+              <p className="text-gray-600 mb-4">Our team is here to help you find the answers you need.</p>
+              <Link to="/contact" className="bg-primary text-white px-6 py-2 rounded-lg inline-block hover:bg-secondary transition">
+                Contact Us
+              </Link>
+            </div>
           </div>
         </section>
       </div>
     );
   }
 
-  // Render Glossary
+  // ============ GLOSSARY ============
   if (type === 'glossary') {
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
     const filteredTerms = resources.filter(term =>
       term.term?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       term.definition?.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    const termsByLetter = (letter) => {
+      return filteredTerms.filter(term => term.letter === letter);
+    };
 
     return (
       <div className="pt-24 pb-16">
@@ -367,7 +446,7 @@ const ResourcePage = () => {
                 placeholder="Search glossary terms..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-primary focus:border-primary"
               />
             </div>
 
@@ -388,14 +467,15 @@ const ResourcePage = () => {
             </div>
 
             <div className="space-y-6">
-              {filteredTerms
-                .filter(term => !searchTerm || term.letter === selectedLetter)
-                .map((term) => (
-                  <div key={term.id} className="border-b border-gray-200 pb-4">
-                    <h3 className="text-xl font-bold text-dark mb-2">{term.term}</h3>
-                    <p className="text-gray-600">{term.definition}</p>
-                  </div>
-                ))}
+              {termsByLetter(selectedLetter).map((term) => (
+                <div key={term.id} className="border-b border-gray-200 pb-4">
+                  <h3 className="text-xl font-bold text-dark mb-2">{term.term}</h3>
+                  <p className="text-gray-600">{term.definition}</p>
+                </div>
+              ))}
+              {termsByLetter(selectedLetter).length === 0 && (
+                <p className="text-center text-gray-500 py-8">No terms found for letter {selectedLetter}.</p>
+              )}
             </div>
           </div>
         </section>
@@ -403,45 +483,174 @@ const ResourcePage = () => {
     );
   }
 
-  // Render Magazine, HIPAA Guide, Coding Updates (simple layout)
+  // ============ HIPAA COMPLIANCE GUIDE ============
+  if (type === 'hipaa-guide') {
+    return (
+      <div className="pt-24 pb-16">
+        <section className="bg-gradient-to-r from-dark to-primary text-white py-20">
+          <div className="max-w-7xl mx-auto px-4 text-center">
+            {getIcon()}
+            <h1 className="text-5xl font-bold mb-4">{getTitle()}</h1>
+            <p className="text-xl text-blue-100 max-w-3xl mx-auto">{getSubtitle()}</p>
+          </div>
+        </section>
+
+        <section className="py-16">
+          <div className="max-w-4xl mx-auto px-4">
+            {resources.map(guide => (
+              <div key={guide.id}>
+                <div className="bg-blue-50 rounded-xl p-6 mb-8">
+                  <h2 className="text-2xl font-bold text-dark mb-4">Your HIPAA Compliance Partner</h2>
+                  <p className="text-gray-700 mb-4">
+                    MahaStar is fully HIPAA compliant, SOC2 Type II audited, and VAPT certified. 
+                    We sign Business Associate Agreements (BAA) with all clients and maintain 
+                    enterprise-grade security controls.
+                  </p>
+                  <div className="flex flex-wrap gap-4">
+                    <span className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full text-sm">
+                      <Shield className="w-4 h-4 text-primary" /> HIPAA Compliant
+                    </span>
+                    <span className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full text-sm">
+                      <Shield className="w-4 h-4 text-primary" /> SOC2 Type II
+                    </span>
+                    <span className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full text-sm">
+                      <Shield className="w-4 h-4 text-primary" /> VAPT Audited
+                    </span>
+                  </div>
+                </div>
+
+                <div 
+                  className="prose prose-lg max-w-none mb-8"
+                  dangerouslySetInnerHTML={{ __html: guide.content || '' }}
+                />
+
+                <div className="bg-gray-50 rounded-xl p-6 text-center">
+                  <FileText className="w-12 h-12 text-primary mx-auto mb-3" />
+                  <h3 className="text-xl font-bold text-dark mb-2">Download Full Compliance Guide</h3>
+                  <p className="text-gray-600 mb-4">Get our complete 24-page HIPAA compliance guide for medical practices.</p>
+                  <button 
+                    onClick={() => openDownloadModal(guide)}
+                    className="bg-primary text-white px-6 py-2 rounded-lg inline-flex items-center gap-2 hover:bg-secondary transition"
+                  >
+                    <Download size={16} /> Download PDF
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="bg-primary text-white py-16 text-center">
+          <Link to="/contact" className="bg-accent px-8 py-3 rounded-lg font-semibold inline-block hover:bg-secondary transition">
+            Request Compliance Consultation
+          </Link>
+        </section>
+      </div>
+    );
+  }
+
+  // ============ CODING UPDATES ============
+  if (type === 'coding-updates') {
+    return (
+      <div className="pt-24 pb-16">
+        <section className="bg-gradient-to-r from-dark to-primary text-white py-20">
+          <div className="max-w-7xl mx-auto px-4 text-center">
+            {getIcon()}
+            <h1 className="text-5xl font-bold mb-4">{getTitle()}</h1>
+            <p className="text-xl text-blue-100 max-w-3xl mx-auto">{getSubtitle()}</p>
+          </div>
+        </section>
+
+        <section className="py-16">
+          <div className="max-w-4xl mx-auto px-4">
+            {resources.map(update => (
+              <div key={update.id}>
+                <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-8 rounded-r-xl">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="text-yellow-600" />
+                    <span className="font-semibold">Effective January 1, 2025</span>
+                  </div>
+                  <p className="text-gray-700 mt-2">All providers must implement these coding changes to ensure accurate reimbursement.</p>
+                </div>
+
+                <div className="bg-white rounded-xl shadow-md p-6 mb-8">
+                  <h2 className="text-2xl font-bold text-dark mb-4">{update.title}</h2>
+                  <p className="text-gray-600 mb-4">Category: <span className="font-semibold">{update.category}</span></p>
+                  <div 
+                    className="prose max-w-none"
+                    dangerouslySetInnerHTML={{ __html: update.content || '' }}
+                  />
+                </div>
+
+                <div className="bg-primary/10 rounded-xl p-6 text-center">
+                  <h3 className="text-xl font-bold text-dark mb-2">Need Help Implementing Coding Updates?</h3>
+                  <p className="text-gray-600 mb-4">Our coding specialists ensure 99.2% accuracy with all 2025 changes.</p>
+                  <Link to="/contact" className="bg-primary text-white px-6 py-2 rounded-lg inline-block hover:bg-secondary transition">
+                    Schedule Coding Audit
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  // Download Modal
   return (
-    <div className="pt-24 pb-16">
-      <section className="bg-gradient-to-r from-dark to-primary text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          {getIcon()}
-          <h1 className="text-5xl font-bold mb-4">{getTitle()}</h1>
-          <p className="text-xl text-blue-100 max-w-3xl mx-auto">{getSubtitle()}</p>
-        </div>
-      </section>
-
-      <section className="py-16">
-        <div className="max-w-4xl mx-auto px-4">
-          {resources.map(resource => (
-            <div key={resource.id} className="bg-white rounded-xl shadow-md p-6 mb-6">
-              <h2 className="text-2xl font-bold text-dark mb-4">{resource.title}</h2>
-              <p className="text-gray-600 mb-4">{resource.description}</p>
-              {resource.content && (
-                <div dangerouslySetInnerHTML={{ __html: resource.content }} className="prose max-w-none" />
-              )}
-              {resource.file_url && (
-                <button
-                  onClick={() => openDownloadModal(resource)}
-                  className="bg-primary text-white px-6 py-2 rounded-lg inline-flex items-center gap-2 mt-4"
-                >
-                  <Download size={16} /> Download PDF
-                </button>
-              )}
+    <>
+      {showModal && selectedResource && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl max-w-md w-full mx-4 p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-dark">Download {selectedResource.title}</h3>
+              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X size={24} />
+              </button>
             </div>
-          ))}
+            <form onSubmit={handleDownload}>
+              <input
+                type="text"
+                placeholder="Full Name *"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-3 focus:ring-primary focus:border-primary"
+                required
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+              />
+              <input
+                type="email"
+                placeholder="Email Address *"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-3 focus:ring-primary focus:border-primary"
+                required
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
+              />
+              <input
+                type="text"
+                placeholder="Practice Name"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4 focus:ring-primary focus:border-primary"
+                value={formData.practice}
+                onChange={(e) => setFormData({...formData, practice: e.target.value})}
+              />
+              <button
+                type="submit"
+                className="w-full bg-primary text-white py-2 rounded-lg hover:bg-secondary transition"
+              >
+                Download Now
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                className="w-full text-gray-500 mt-2 hover:text-gray-700"
+              >
+                Cancel
+              </button>
+            </form>
+          </div>
         </div>
-      </section>
-
-      <section className="bg-primary text-white py-16 text-center">
-        <Link to="/contact" className="bg-accent px-8 py-3 rounded-lg font-semibold inline-block hover:bg-secondary transition">
-          Contact Us for More Information
-        </Link>
-      </section>
-    </div>
+      )}
+    </>
   );
 };
 
