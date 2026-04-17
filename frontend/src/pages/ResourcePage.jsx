@@ -37,31 +37,43 @@ const ResourcePage = () => {
   };
 
   const handleDownload = async (e) => {
-    e.preventDefault();
-    try {
-      await api.post(`/api/resource/${selectedResource.id}/download`, {
-        name: formData.name,
-        email: formData.email,
-        practice: formData.practice,
-        resource_type: selectedResource.resource_type
-      });
-      alert(`Thank you! The ${selectedResource.title} will be sent to ${formData.email}`);
-      setFormData({ name: '', email: '', practice: '' });
-      setShowModal(false);
-      setSelectedResource(null);
-      
-      if (selectedResource.file_url || selectedResource.pdf_url) {
-        window.open(selectedResource.file_url || selectedResource.pdf_url, '_blank');
-      }
-    } catch (error) {
-      alert('Error processing request. Please try again.');
-    }
-  };
-
-  const openDownloadModal = (resource) => {
-    setSelectedResource(resource);
-    setShowModal(true);
-  };
+  e.preventDefault();
+  
+  // Determine the URL to open (prefer file_url, then pdf_url)
+  const downloadUrl = selectedResource.file_url || selectedResource.pdf_url;
+  
+  if (!downloadUrl) {
+    alert('Error: PDF URL not found. Please contact support.');
+    return;
+  }
+  
+  try {
+    // Track download in database
+    await api.post(`/api/resource/${selectedResource.id}/download`, {
+      name: formData.name,
+      email: formData.email,
+      practice: formData.practice,
+      resource_type: selectedResource.resource_type
+    });
+    
+    alert(`Thank you ${formData.name}! The ${selectedResource.title} will open in a new tab.`);
+    
+    // Open PDF in new tab
+    window.open(downloadUrl, '_blank');
+    
+    // Reset form and close modal
+    setFormData({ name: '', email: '', practice: '' });
+    setShowModal(false);
+    setSelectedResource(null);
+    
+  } catch (error) {
+    console.error('Download error:', error);
+    // Still try to open the PDF even if tracking fails
+    window.open(downloadUrl, '_blank');
+    setShowModal(false);
+    setSelectedResource(null);
+  }
+};
 
   const getIcon = () => {
     switch(type) {
@@ -483,7 +495,7 @@ const ResourcePage = () => {
     );
   }
 
-  // ============ HIPAA COMPLIANCE GUIDE ============
+// ============ HIPAA COMPLIANCE GUIDE ============
 if (type === 'hipaa-guide') {
   return (
     <div className="pt-24 pb-16">
@@ -528,8 +540,13 @@ if (type === 'hipaa-guide') {
                 <FileText className="w-12 h-12 text-primary mx-auto mb-3" />
                 <h3 className="text-xl font-bold text-dark mb-2">Download Full Compliance Guide</h3>
                 <p className="text-gray-600 mb-4">Get our complete 24-page HIPAA compliance guide for medical practices.</p>
+                {/* Debug info - remove after testing */}
+                <p className="text-xs text-gray-400 mb-2">PDF URL: {guide.file_url || 'Not set'}</p>
                 <button 
-                  onClick={() => openDownloadModal(guide)}
+                  onClick={() => {
+                    console.log('Guide data:', guide);
+                    openDownloadModal(guide);
+                  }}
                   className="bg-primary text-white px-6 py-2 rounded-lg inline-flex items-center gap-2 hover:bg-secondary transition"
                 >
                   <Download size={16} /> Download PDF
