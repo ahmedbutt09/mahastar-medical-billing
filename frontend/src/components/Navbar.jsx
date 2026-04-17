@@ -47,10 +47,10 @@ const Navbar = () => {
     solutions: {
       title: 'Solutions',
       links: [
-        { path: '/for-hospitals', label: 'For Hospitals' },
-        { path: '/for-medical-groups', label: 'For Medical Groups' },
-        { path: '/for-independent-practices', label: 'For Independent Practices' },
-        { path: '/for-in-house-teams', label: 'For In-House Teams' },
+  { path: '/audience/for-hospitals', label: 'For Hospitals' },
+  { path: '/audience/for-medical-groups', label: 'For Medical Groups' },
+  { path: '/audience/for-independent-practices', label: 'For Independent Practices' },
+  { path: '/audience/for-in-house-teams', label: 'For In-House Teams' },
       ]
     },
     specialties: {

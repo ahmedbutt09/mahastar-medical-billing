@@ -79,7 +79,7 @@ const AppContent = () => {
           <Route path="/software/:slug" element={<DynamicPage />} />
           <Route path="/automation/:slug" element={<DynamicPage />} />
           <Route path="/solutions/:slug" element={<DynamicPage />} />
-          
+          <Route path="/audience/:slug" element={<DynamicPage />} />
           {/* Static unique pages */}
          
           <Route path="/events" element={<Events />} />
@@ -93,10 +93,6 @@ const AppContent = () => {
           <Route path="/company/leadership" element={<Leadership />} />
           <Route path="/company/careers" element={<Careers />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/for-hospitals" element={<ForHospitals />} />
-          <Route path="/for-medical-groups" element={<ForMedicalGroups />} />
-          <Route path="/for-independent-practices" element={<ForIndependentPractices />} />
-          <Route path="/for-in-house-teams" element={<ForInHouseTeams />} />
         </Routes>
       </main>
       <Footer />
