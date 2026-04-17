@@ -19,7 +19,6 @@ import Pricing from './pages/Pricing';
 import CaseStudies from './pages/CaseStudies';
 import DynamicPage from './pages/DynamicPage';
 import ResourcePage from './pages/ResourcePage';
-
 // Listing pages
 import Payers from './pages/Payers';
 import Specialties from './pages/Specialties';
@@ -27,16 +26,6 @@ import Resources from './pages/Resources';
 
 // Static pages (unique layouts)
 import AISolutions from './pages/ai/AISolutions';
-import RCMSoftware from './pages/software/RCMSoftware';
-import RCMServices from './pages/automation/RCMServices';
-import Events from './pages/resources/Events';
-import Magazine from './pages/resources/Magazine';
-import Whitepapers from './pages/resources/Whitepapers';
-import Webinars from './pages/resources/Webinars';
-import FAQs from './pages/resources/FAQs';
-import RCMGlossary from './pages/resources/RCMGlossary';
-import HIPAAComplianceGuide from './pages/resources/HIPAAComplianceGuide';
-import CodingUpdates2025 from './pages/resources/CodingUpdates2025';
 import Leadership from './pages/company/Leadership';
 import Careers from './pages/company/Careers';
 import PrivacyPolicy from './pages/company/PrivacyPolicy';
@@ -67,10 +56,10 @@ const AppContent = () => {
           <Route path="/contact" element={<Contact />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={
-            <ProtectedRoute>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } />
+  <ProtectedRoute>
+    <AdminDashboard />
+  </ProtectedRoute>
+} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/case-studies" element={<CaseStudies />} />
           
@@ -88,29 +77,13 @@ const AppContent = () => {
           <Route path="/automation/:slug" element={<DynamicPage />} />
           <Route path="/solutions/:slug" element={<DynamicPage />} />
           <Route path="/audience/:slug" element={<DynamicPage />} />
-          
-          {/* Resource page (dynamic for all resource types) */}
           <Route path="/resources/:type" element={<ResourcePage />} />
-          
           {/* Static unique pages */}
-          <Route path="/ai-solutions" element={<AISolutions />} />
-          <Route path="/rcm-software" element={<RCMSoftware />} />
-          <Route path="/rcm-automation" element={<RCMServices />} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/magazine" element={<Magazine />} />
-          <Route path="/resources/whitepapers" element={<Whitepapers />} />
-          <Route path="/resources/webinars" element={<Webinars />} />
-          <Route path="/resources/faqs" element={<FAQs />} />
-          <Route path="/resources/glossary" element={<RCMGlossary />} />
-          <Route path="/resources/hipaa-guide" element={<HIPAAComplianceGuide />} />
-          <Route path="/resources/coding-updates" element={<CodingUpdates2025 />} />
+         
+          
           <Route path="/company/leadership" element={<Leadership />} />
           <Route path="/company/careers" element={<Careers />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/for-hospitals" element={<ForHospitals />} />
-          <Route path="/for-medical-groups" element={<ForMedicalGroups />} />
-          <Route path="/for-independent-practices" element={<ForIndependentPractices />} />
-          <Route path="/for-in-house-teams" element={<ForInHouseTeams />} />
         </Routes>
       </main>
       <Footer />
