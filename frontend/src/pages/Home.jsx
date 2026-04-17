@@ -13,7 +13,21 @@ import {
   Building2, ThumbsUp, FileText, PhoneCall, CreditCard,
   Users, Lock, Stethoscope, Heart, Brain
 } from 'lucide-react';
-
+const iconMap = {
+  TrendingUp: TrendingUp,
+  Activity: Activity,
+  Shield: Shield,
+  DollarSign: DollarSign,
+  Headphones: Headphones,
+  FileCheck: FileCheck,
+  Award: Award,
+  BarChart3: BarChart3,
+  Clock: Clock,
+  Users: Users,
+  Lock: Lock,
+  Zap: Zap,
+  ThumbsUp: ThumbsUp
+};
 const Home = () => {
   const [homeContent, setHomeContent] = useState(null);
   const [services, setServices] = useState([]);
@@ -182,30 +196,32 @@ const Home = () => {
 
       {/* Services Section with Image */}
       <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-dark mb-4">
-              {homeContent?.services_title || 'Full Spectrum RCM Services'}
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              {homeContent?.services_subtitle || 'Gain optimal reimbursement across both payment structures. Mitigate compliance risks. Improve medical coding efficiency.'}
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.map((service, index) => (
-              <Link key={index} to={`/services/${service.slug}`} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all hover:scale-105 block">
-                <service.icon_name === 'TrendingUp' ? <TrendingUp className="w-14 h-14 text-primary mb-4" /> :
-                 <FileCheck className="w-14 h-14 text-primary mb-4" />}
-                <h3 className="text-xl font-semibold mb-3 text-dark">{service.title}</h3>
-                <p className="text-gray-600">{service.description}</p>
-                <div className="mt-4 text-primary font-medium flex items-center gap-1">
-                  Learn More →
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="text-center mb-12">
+      <h2 className="text-4xl font-bold text-dark mb-4">
+        {homeContent?.services_title || 'Full Spectrum RCM Services'}
+      </h2>
+      <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+        {homeContent?.services_subtitle || 'Gain optimal reimbursement across both payment structures. Mitigate compliance risks. Improve medical coding efficiency.'}
+      </p>
+    </div>
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {services.map((service, index) => {
+        const IconComponent = iconMap[service.icon_name] || FileCheck;
+        return (
+          <Link key={index} to={`/services/${service.slug}`} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all hover:scale-105 block">
+            <IconComponent className="w-14 h-14 text-primary mb-4" />
+            <h3 className="text-xl font-semibold mb-3 text-dark">{service.title}</h3>
+            <p className="text-gray-600">{service.description}</p>
+            <div className="mt-4 text-primary font-medium flex items-center gap-1">
+              Learn More →
+            </div>
+          </Link>
+        );
+      })}
+    </div>
+  </div>
+</section>
 
       {/* Doctor/Team Image Section */}
       <section className="py-20 bg-white">
