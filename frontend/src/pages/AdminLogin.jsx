@@ -8,18 +8,17 @@ const AdminLogin = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Simple password protection (you can make this more secure)
     if (password === 'Mahastar2024!') {
       localStorage.setItem('adminAuth', 'true');
       toast.success('Login successful!');
-      navigate('/admin/dashboard');
+      navigate('/admin/dashboard');  // This now goes to /admin/dashboard
     } else {
       toast.error('Invalid password');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 pt-20">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-xl shadow-lg">
         <div>
           <h2 className="text-center text-3xl font-bold text-primary">
