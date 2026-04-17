@@ -120,7 +120,7 @@ const AdminDashboard = () => {
   </button>
 </div>
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 items-stretch">
         {/* 2. OVERLAY - Fixed Z-index to sit between header and sidebar */}
         {sidebarOpen && (
           <div 
@@ -131,22 +131,23 @@ const AdminDashboard = () => {
 
         {/* 3. SIDEBAR - Added h-full and fixed desktop/mobile logic */}
         <aside className={`
-  /* Base styles: Ensure it takes full height and sits at the top left */
-  fixed top-0 bottom-0 left-0 transition-transform duration-300
-  w-72 bg-dark text-white overflow-y-auto shadow-xl
+  /* Base styles */
+  fixed md:sticky top-0 left-0 bg-dark text-white transition-transform duration-300
   
-  /* Mobile: High z-index to stay above main content */
+  /* Height fix: h-screen ensures it always spans the full viewport height */
+  w-72 h-screen overflow-y-auto shadow-xl
+  
+  /* Mobile: Stay on top */
   z-50 
   ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
   
-  /* Desktop: Become part of the flow so it doesn't overlap the content */
-  md:relative md:translate-x-0 md:z-10 md:h-screen
+  /* Desktop: Use sticky to stay locked while the main content scrolls */
+  md:translate-x-0 md:block md:z-10
 `}>
-  {/* Add this empty div ONLY for mobile to push the sidebar items 
-      down below the "MahaStar Admin" mobile header toggle */}
+  {/* Mobile Header Spacer */}
   <div className="h-16 md:hidden" /> 
 
-  <div className="p-6 border-b border-white/10">
+  <div className="p-6 border-b border-white/10 flex-shrink-0">
     <h1 className="text-xl font-bold">MahaStar Admin</h1>
     <p className="text-xs text-gray-400 mt-1">CMS Dashboard</p>
   </div>
@@ -190,7 +191,7 @@ const AdminDashboard = () => {
         </aside>
 
        {/* Main Content Area */}
-<main className="flex-1 min-h-screen bg-gray-50 flex flex-col min-w-0 overflow-hidden">
+<main className="flex-1 min-h-screen bg-gray-50 flex flex-col min-w-0 ">
   
   {/* 1. MOBILE HEADER SPACER 
       This prevents your content from hiding under the fixed "MahaStar Admin" black bar on mobile.
@@ -200,7 +201,7 @@ const AdminDashboard = () => {
   {/* 2. SCROLLABLE CONTENT WRAPPER */}
   <div className="flex-1 overflow-y-auto overflow-x-hidden">
     
-    <div className="p-4 md:p-8 max-w-7xl mx-auto">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto w-full">
       
       {/* Overview Section */}
       {activeTab === 'overview' && (
