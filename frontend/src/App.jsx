@@ -87,10 +87,9 @@ const AppContent = () => {
           
           {/* EHR dynamic pages: /ehr/epic, /ehr/cerner, etc. */}
           <Route path="/ehr/:slug" element={<DynamicPage />} />
-          
+          <Route path="/software/:slug" element={<DynamicPage />} />
           {/* Static unique pages (keep as-is) */}
           <Route path="/ai-solutions" element={<AISolutions />} />
-          <Route path="/rcm-software" element={<RCMSoftware />} />
           <Route path="/rcm-automation" element={<RCMServices />} />
           <Route path="/events" element={<Events />} />
           <Route path="/magazine" element={<Magazine />} />
