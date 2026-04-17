@@ -112,8 +112,8 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Mobile Header - Below Navbar */}
-      <div className="md:hidden fixed top-16 left-0 right-0 bg-dark text-white z-40 px-4 py-3 flex items-center justify-between shadow-lg">
+      {/* Mobile Header */}
+      <div className="md:hidden fixed top-0 left-0 right-0 bg-dark text-white z-40 px-4 py-3 flex items-center justify-between shadow-lg">
         <h1 className="text-lg font-bold">MahaStar Admin</h1>
         <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2">
           <Menu size={24} />
@@ -124,24 +124,22 @@ const AdminDashboard = () => {
       {sidebarOpen && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-          style={{ top: '64px' }}
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Desktop Layout - Flex Row */}
+      {/* Desktop Layout */}
       <div className="flex min-h-screen">
-        {/* Sidebar - Desktop - Starts below navbar */}
+        {/* Sidebar */}
         <aside className={`
           fixed md:relative z-50 bg-dark text-white transition-transform duration-300
           w-72 h-screen overflow-y-auto
-          top-16 md:top-0
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           md:translate-x-0 md:block
           shadow-xl
         `}>
           {/* Sidebar Header */}
-          <div className="p-6 border-b border-white/10 mt-0 md:mt-0">
+          <div className="p-6 border-b border-white/10">
             <h1 className="text-xl font-bold">MahaStar Admin</h1>
             <p className="text-xs text-gray-400 mt-1">Content Management System</p>
           </div>
@@ -196,11 +194,10 @@ const AdminDashboard = () => {
 
         {/* Main Content */}
         <main className="flex-1 min-h-screen">
-          {/* Content Area - Add padding top to account for navbar on mobile */}
-          <div className="pt-16 md:pt-0">
+          <div className="p-4 md:p-8">
             {/* Overview Tab */}
             {activeTab === 'overview' && (
-              <div className="p-4 md:p-8">
+              <>
                 <div className="mb-6">
                   <h1 className="text-2xl md:text-3xl font-bold text-dark">Dashboard Overview</h1>
                   <p className="text-gray-500 mt-1">Welcome back! Here's what's happening with your website.</p>
@@ -208,7 +205,7 @@ const AdminDashboard = () => {
                 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
-                  <div className="bg-white rounded-xl shadow-md p-4 md:p-6 hover:shadow-lg transition">
+                  <div className="bg-white rounded-xl shadow-md p-4 md:p-6">
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="text-2xl md:text-3xl font-bold text-primary">{stats.totalContacts}</div>
@@ -219,7 +216,7 @@ const AdminDashboard = () => {
                     <div className="mt-2 text-xs text-yellow-600">{stats.pendingContacts} pending</div>
                   </div>
                   
-                  <div className="bg-white rounded-xl shadow-md p-4 md:p-6 hover:shadow-lg transition">
+                  <div className="bg-white rounded-xl shadow-md p-4 md:p-6">
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="text-2xl md:text-3xl font-bold text-primary">{stats.totalSubscribers}</div>
@@ -229,7 +226,7 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                   
-                  <div className="bg-white rounded-xl shadow-md p-4 md:p-6 hover:shadow-lg transition">
+                  <div className="bg-white rounded-xl shadow-md p-4 md:p-6">
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="text-2xl md:text-3xl font-bold text-primary">{stats.totalDynamicPages}</div>
@@ -239,7 +236,7 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                   
-                  <div className="bg-white rounded-xl shadow-md p-4 md:p-6 hover:shadow-lg transition">
+                  <div className="bg-white rounded-xl shadow-md p-4 md:p-6">
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="text-2xl md:text-3xl font-bold text-primary">{stats.totalPageViews.toLocaleString()}</div>
@@ -286,7 +283,7 @@ const AdminDashboard = () => {
                     </table>
                   </div>
                 </div>
-              </div>
+              </>
             )}
 
             {/* Other Tabs */}
