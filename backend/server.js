@@ -1647,6 +1647,54 @@ app.post('/api/resource/:id/download', async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+// ============= LEADERSHIP ENDPOINTS =============
+app.get('/api/leadership', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('leadership')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true });
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ============= CAREERS ENDPOINTS =============
+app.get('/api/careers', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('careers')
+      .select('*')
+      .eq('is_active', true)
+      .order('posted_date', { ascending: false });
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Apply for job
+app.post('/api/careers/:id/apply', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email, phone, resume_url, cover_letter } = req.body;
+    
+    const { error } = await supabaseAdmin
+      .from('job_applications')
+      .insert([{ job_id: id, name, email, phone, resume_url, cover_letter }]);
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, message: 'Application submitted successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 // A simple health check to test if the backend is alive
 // Health check for Vercel testing
 app.get('/api/health', (req, res) => {
