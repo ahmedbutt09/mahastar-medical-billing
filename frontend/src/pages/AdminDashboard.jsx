@@ -20,6 +20,10 @@ import ResourcesManager from '../components/admin/ResourcesManager';
 import PricingManager from '../components/admin/PricingManager';
 import LeadershipManager from '../components/admin/LeadershipManager';
 import CareersManager from '../components/admin/CareersManager';
+import ContactsManager from '../components/admin/ContactsManager';
+import SubscribersManager from '../components/admin/SubscribersManager';
+import ChatCallbacksManager from '../components/admin/ChatCallbacksManager';
+import AnalyticsManager from '../components/admin/AnalyticsManager';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
