@@ -3,17 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import toast from 'react-hot-toast';
 import { 
-  Mail, Phone, Calendar, Eye, CheckCircle, XCircle, 
-  MessageCircle, Users, FileText, TrendingUp, Clock,
-  Check, X, Trash2, RefreshCw, Send, Download, 
-  BarChart3, Headphones, Brain, Settings, Calendar as CalendarIcon,
-  BookOpen, Shield, Building2, Activity, Zap, Home,
-  DollarSign, HelpCircle, Book, Video, FileQuestion, Layout, Globe, LogOut,
-  Briefcase, Menu, X as CloseIcon
+  Mail, Users, FileText, BarChart3, Headphones, Layout, 
+  DollarSign, Briefcase, Home, LogOut, Menu, X as CloseIcon,
+  BookOpen
 } from 'lucide-react';
 
 // Import manager components
-import PageContentManager from '../components/admin/PageContentManager';
 import DynamicPagesManager from '../components/admin/DynamicPagesManager';
 import CaseStudiesManager from '../components/admin/CaseStudiesManager';
 import ResourcesManager from '../components/admin/ResourcesManager';
@@ -35,11 +30,8 @@ const AdminDashboard = () => {
     totalSubscribers: 0,
     totalChatCallbacks: 0,
     pendingChatCallbacks: 0,
-    totalCaseStudies: 0,
-    totalPageViews: 0,
     totalDynamicPages: 0,
-    totalResources: 0,
-    totalBlogPosts: 0
+    totalPageViews: 0
   });
   
   const [recentContacts, setRecentContacts] = useState([]);
@@ -78,11 +70,8 @@ const AdminDashboard = () => {
         totalSubscribers: subscribers.length,
         totalChatCallbacks: chatCallbacks.length,
         pendingChatCallbacks: chatCallbacks.filter(c => c.status === 'pending').length,
-        totalCaseStudies: 0,
-        totalPageViews: 12500,
         totalDynamicPages: dynamicPages.length,
-        totalResources: 0,
-        totalBlogPosts: 0
+        totalPageViews: 12500
       });
       
       setRecentContacts(contacts.slice(0, 5));
@@ -123,8 +112,8 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Mobile Header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 bg-dark text-white z-40 px-4 py-3 flex items-center justify-between">
+      {/* Mobile Header - Below Navbar */}
+      <div className="md:hidden fixed top-16 left-0 right-0 bg-dark text-white z-40 px-4 py-3 flex items-center justify-between shadow-lg">
         <h1 className="text-lg font-bold">MahaStar Admin</h1>
         <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2">
           <Menu size={24} />
@@ -135,21 +124,24 @@ const AdminDashboard = () => {
       {sidebarOpen && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          style={{ top: '64px' }}
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Desktop Layout - Flex Row */}
-      <div className="flex">
-        {/* Sidebar - Desktop */}
+      <div className="flex min-h-screen">
+        {/* Sidebar - Desktop - Starts below navbar */}
         <aside className={`
           fixed md:relative z-50 bg-dark text-white transition-transform duration-300
           w-72 h-screen overflow-y-auto
+          top-16 md:top-0
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           md:translate-x-0 md:block
+          shadow-xl
         `}>
           {/* Sidebar Header */}
-          <div className="p-6 border-b border-white/10">
+          <div className="p-6 border-b border-white/10 mt-0 md:mt-0">
             <h1 className="text-xl font-bold">MahaStar Admin</h1>
             <p className="text-xs text-gray-400 mt-1">Content Management System</p>
           </div>
@@ -163,7 +155,7 @@ const AdminDashboard = () => {
           </button>
           
           {/* Navigation */}
-          <nav className="p-4 space-y-1">
+          <nav className="p-4 space-y-1 pb-24">
             {menuItems.map((item) => (
               <button
                 key={item.id}
@@ -204,19 +196,11 @@ const AdminDashboard = () => {
 
         {/* Main Content */}
         <main className="flex-1 min-h-screen">
-          {/* Desktop Header */}
-          <div className="hidden md:block bg-white border-b sticky top-0 z-10">
-            <div className="px-8 py-4">
-              <h1 className="text-2xl font-bold text-dark">Dashboard</h1>
-              <p className="text-gray-500 text-sm">Welcome back! Here's what's happening with your website.</p>
-            </div>
-          </div>
-
-          {/* Content Area */}
-          <div className="p-4 md:p-8">
+          {/* Content Area - Add padding top to account for navbar on mobile */}
+          <div className="pt-16 md:pt-0">
             {/* Overview Tab */}
             {activeTab === 'overview' && (
-              <div>
+              <div className="p-4 md:p-8">
                 <div className="mb-6">
                   <h1 className="text-2xl md:text-3xl font-bold text-dark">Dashboard Overview</h1>
                   <p className="text-gray-500 mt-1">Welcome back! Here's what's happening with your website.</p>
