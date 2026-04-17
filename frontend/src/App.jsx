@@ -42,24 +42,29 @@ const AppContent = () => {
     trackPageView(location.pathname);
   }, [location]);
 
+  // Logic to check if the current page is an admin page
+  const isAdminPath = location.pathname.startsWith('/admin');
+
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-grow">
+      {/* 1. Only show Navbar if we are NOT on an admin page */}
+      {!isAdminPath && <Navbar />}
+      
+      {/* 2. Remove flex-grow logic for Admin to prevent scroll bugs */}
+      <main className={isAdminPath ? "flex-1" : "flex-grow"}>
         <Routes>
-          {/* Main pages */}
           <Route path="/" element={<Home />} />
           <Route path="/services" element={<Services />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/admin" element={<AdminLogin />} />
+      <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={
-  <ProtectedRoute>
-    <AdminDashboard />
-  </ProtectedRoute>
-} />
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/case-studies" element={<CaseStudies />} />
           
@@ -86,9 +91,10 @@ const AppContent = () => {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         </Routes>
       </main>
-      <Footer />
+      {/* 3. Hide Footer and ChatBot on Admin pages */}
+      {!isAdminPath && <Footer />}
+      {!isAdminPath && <ChatBot />}
       <Toaster position="top-right" />
-      <ChatBot />
     </div>
   );
 };
