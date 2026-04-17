@@ -74,6 +74,11 @@ const ResourcePage = () => {
     setSelectedResource(null);
   }
 };
+const openDownloadModal = (resource) => {
+  console.log('Opening modal for resource:', resource);
+  setSelectedResource(resource);
+  setShowModal(true);
+};
 
   const getIcon = () => {
     switch(type) {
