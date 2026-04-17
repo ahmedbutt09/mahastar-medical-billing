@@ -13,6 +13,7 @@ import {
   Building2, ThumbsUp, FileText, PhoneCall, CreditCard,
   Users, Lock, Stethoscope, Heart, Brain
 } from 'lucide-react';
+
 const iconMap = {
   TrendingUp: TrendingUp,
   Activity: Activity,
@@ -28,6 +29,7 @@ const iconMap = {
   Zap: Zap,
   ThumbsUp: ThumbsUp
 };
+
 const Home = () => {
   const [homeContent, setHomeContent] = useState(null);
   const [services, setServices] = useState([]);
@@ -40,16 +42,14 @@ const Home = () => {
   const fetchHomeData = async () => {
     setLoading(true);
     try {
-      // Fetch homepage content from database
       const contentRes = await api.get('/api/page-content/home');
       if (contentRes.data.success) {
         setHomeContent(contentRes.data.data);
       }
 
-      // Fetch services for homepage display
       const servicesRes = await api.get('/api/services');
       if (servicesRes.data.success) {
-        setServices(servicesRes.data.data.slice(0, 6)); // Show first 6 services
+        setServices(servicesRes.data.data.slice(0, 6));
       }
     } catch (error) {
       console.error('Error fetching home data:', error);
@@ -58,7 +58,6 @@ const Home = () => {
     }
   };
 
-  // Fallback data if API fails
   const fallbackHeroImage = 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=1200';
   const fallbackDoctorImage = 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=800';
   const fallbackTeamImage = 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800';
@@ -94,7 +93,7 @@ const Home = () => {
 
   return (
     <div>
-      {/* Hero Section with Doctor Image */}
+      {/* Hero Section with Company Branding */}
       <section className="relative bg-gradient-to-br from-dark via-dark to-primary text-white overflow-hidden">
         <div className="absolute inset-0">
           <img 
@@ -107,6 +106,7 @@ const Home = () => {
         <div className="relative z-10 pt-32 pb-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
+              {/* Left Column - Text Content */}
               <div>
                 <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
                   <Zap className="w-4 h-4 text-accent" />
@@ -139,40 +139,60 @@ const Home = () => {
                   ))}
                 </div>
               </div>
-              <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
-                <div className="text-center mb-4">
-                  <span className="text-accent font-semibold">Real-time RCM Dashboard</span>
+
+              {/* Right Column - Company Logo & Branding */}
+              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/20 text-center">
+                {/* Company Logo */}
+                <div className="mb-6">
+                  <img 
+  src="/images/mahastar-logo.png" 
+  alt="MahaStar Logo"
+  className="w-32 mx-auto mb-4"
+/>
+                  <h2 className="text-2xl font-bold text-white mb-1">
+                    MahaStar Medical Billing
+                  </h2>
+                  <p className="text-accent font-medium">
+                    & IT Solutions LLC
+                  </p>
                 </div>
-                <div className="space-y-4">
-                  <div className="bg-dark/50 rounded-lg p-4">
-                    <div className="flex justify-between text-sm">
-                      <span>Claim Acceptance Rate</span>
-                      <span className="text-accent font-bold">98%</span>
-                    </div>
-                    <div className="w-full bg-gray-700 rounded-full h-2 mt-2">
-                      <div className="bg-accent h-2 rounded-full" style={{ width: '98%' }}></div>
-                    </div>
+                
+                <div className="w-16 h-1 bg-accent mx-auto mb-6"></div>
+                
+                {/* Key Statistics */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <div className="text-2xl font-bold text-accent">15+</div>
+                    <div className="text-xs text-blue-100">Years Experience</div>
                   </div>
-                  <div className="bg-dark/50 rounded-lg p-4">
-                    <div className="flex justify-between text-sm">
-                      <span>AR Days (Industry: 45)</span>
-                      <span className="text-accent font-bold">22 Days</span>
-                    </div>
-                    <div className="w-full bg-gray-700 rounded-full h-2 mt-2">
-                      <div className="bg-accent h-2 rounded-full" style={{ width: '51%' }}></div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 mt-4">
-                    <div className="text-center p-3 bg-dark/50 rounded-lg">
-                      <div className="text-2xl font-bold text-accent">$250M+</div>
-                      <div className="text-xs text-gray-400">Claims Processed</div>
-                    </div>
-                    <div className="text-center p-3 bg-dark/50 rounded-lg">
-                      <div className="text-2xl font-bold text-accent">99.2%</div>
-                      <div className="text-xs text-gray-400">Coding Accuracy</div>
-                    </div>
+                  <div>
+                    <div className="text-2xl font-bold text-accent">500+</div>
+                    <div className="text-xs text-blue-100">Happy Clients</div>
                   </div>
                 </div>
+                
+                {/* Trust Badges */}
+                <div className="space-y-2 text-left mb-6">
+                  <div className="flex items-center gap-2 text-sm text-blue-100">
+                    <CheckCircle className="w-4 h-4 text-accent" />
+                    <span>HIPAA Compliant</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-blue-100">
+                    <CheckCircle className="w-4 h-4 text-accent" />
+                    <span>SOC2 Type II Certified</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-blue-100">
+                    <CheckCircle className="w-4 h-4 text-accent" />
+                    <span>99.2% Coding Accuracy</span>
+                  </div>
+                </div>
+                
+                <Link 
+                  to="/contact" 
+                  className="inline-block bg-accent hover:bg-secondary text-white px-6 py-2 rounded-lg transition w-full text-center font-semibold"
+                >
+                  Schedule Consultation →
+                </Link>
               </div>
             </div>
           </div>
@@ -194,34 +214,34 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Services Section with Image */}
+      {/* Services Section */}
       <section className="py-20 bg-gray-50">
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div className="text-center mb-12">
-      <h2 className="text-4xl font-bold text-dark mb-4">
-        {homeContent?.services_title || 'Full Spectrum RCM Services'}
-      </h2>
-      <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-        {homeContent?.services_subtitle || 'Gain optimal reimbursement across both payment structures. Mitigate compliance risks. Improve medical coding efficiency.'}
-      </p>
-    </div>
-    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {services.map((service, index) => {
-        const IconComponent = iconMap[service.icon_name] || FileCheck;
-        return (
-          <Link key={index} to={`/services/${service.slug}`} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all hover:scale-105 block">
-            <IconComponent className="w-14 h-14 text-primary mb-4" />
-            <h3 className="text-xl font-semibold mb-3 text-dark">{service.title}</h3>
-            <p className="text-gray-600">{service.description}</p>
-            <div className="mt-4 text-primary font-medium flex items-center gap-1">
-              Learn More →
-            </div>
-          </Link>
-        );
-      })}
-    </div>
-  </div>
-</section>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-dark mb-4">
+              {homeContent?.services_title || 'Full Spectrum RCM Services'}
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              {homeContent?.services_subtitle || 'Gain optimal reimbursement across both payment structures. Mitigate compliance risks. Improve medical coding efficiency.'}
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {services.map((service, index) => {
+              const IconComponent = iconMap[service.icon_name] || FileCheck;
+              return (
+                <Link key={index} to={`/services/${service.slug}`} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all hover:scale-105 block">
+                  <IconComponent className="w-14 h-14 text-primary mb-4" />
+                  <h3 className="text-xl font-semibold mb-3 text-dark">{service.title}</h3>
+                  <p className="text-gray-600">{service.description}</p>
+                  <div className="mt-4 text-primary font-medium flex items-center gap-1">
+                    Learn More →
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
 
       {/* Doctor/Team Image Section */}
       <section className="py-20 bg-white">
@@ -232,7 +252,7 @@ const Home = () => {
                 {homeContent?.about_title || 'Expert Team of Medical Billing Specialists'}
               </h2>
               <p className="text-gray-600 mb-6">
-                {homeContent?.about_text || 'Our team of AAPC-certified coders, former practice managers, and RCM experts bring decades of experience to maximize your revenue. We understand the unique challenges of medical practices because we\'ve been in your shoes.'}
+                {homeContent?.about_text || 'Our team of AAPC-certified coders, former practice managers, and RCM experts bring decades of experience to maximize your revenue. We understand the unique challenges of medical practices because we have been in your shoes.'}
               </p>
               <ul className="space-y-3 mb-8">
                 <li className="flex items-center gap-3">
@@ -256,10 +276,10 @@ const Home = () => {
               <div className="absolute -top-4 -left-4 w-32 h-32 bg-primary/10 rounded-full"></div>
               <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-accent/10 rounded-full"></div>
               <img 
-  src={homeContent?.team_image || fallbackTeamImage}
-  alt="Medical billing team"
-  className="rounded-2xl shadow-xl relative z-10 w-full object-cover"
-/>
+                src={homeContent?.team_image || fallbackTeamImage}
+                alt="Medical billing team"
+                className="rounded-2xl shadow-xl relative z-10 w-full object-cover"
+              />
             </div>
           </div>
         </div>
