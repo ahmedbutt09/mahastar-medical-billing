@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { 
   Mail, Users, FileText, BarChart3, Headphones, Layout, 
   DollarSign, Briefcase, Home, LogOut, Menu, X as CloseIcon,
-  BookOpen, MessageCircle, CheckCircle, Clock, AlertCircle
+  BookOpen, MessageCircle, CheckCircle, Clock, AlertCircle, Phone
 } from 'lucide-react';
 
 // Import manager components
