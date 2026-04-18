@@ -307,6 +307,34 @@ const DynamicPage = () => {
         </div>
       </section>
 
+      {/* Process Image Section - Shows the RCM infographic */}
+      {(pageData.process_image || pageData.section_image) && (
+        <section className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-dark mb-4">
+                Our Proven {pageData.page_type === 'services' ? pageData.page_title?.split(' ')[0] || '' : ''} Process
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                End-to-end revenue cycle management that delivers measurable results
+              </p>
+              <div className="w-20 h-1 bg-primary mx-auto mt-4 rounded-full"></div>
+            </div>
+            <div className="relative">
+              <div className="absolute -top-4 -left-4 w-32 h-32 bg-primary/10 rounded-full"></div>
+              <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-accent/10 rounded-full"></div>
+              <div className="relative z-10 bg-gradient-to-br from-primary/5 to-primary/10 rounded-2xl p-4 shadow-xl">
+                <img 
+                  src={pageData.process_image || pageData.section_image}
+                  alt={`${pageData.page_title} Process`}
+                  className="rounded-xl w-full object-contain"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* CTA Section */}
       {(pageData.cta_title || pageData.cta_text) && (
         <section className="bg-primary text-white py-16">
