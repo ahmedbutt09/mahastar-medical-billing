@@ -144,10 +144,10 @@ const Home = () => {
 <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/20 text-center">
   {/* Your Logo from Supabase */}
   <img 
-    src={homeContent?.logo_url || 'https://foqmcizermoatgwknwfc.supabase.co/storage/v1/object/public/images/brand/mahastar-logo.png'}
-    alt="MahaStar Medical Billing"
-    className="w-48 mx-auto mb-6"
-  />
+  src={homeContent?.logo_url || 'https://foqmcizermoatgwknwfc.supabase.co/storage/v1/object/public/images/brand/mahastar-logo.png'}
+  alt="MahaStar Medical Billing"
+  className="w-48 sm:w-56 md:w-64 mx-auto mb-6"
+/>
   
   <h2 className="text-2xl font-bold text-white mb-1">
     MahaStar Medical Billing
