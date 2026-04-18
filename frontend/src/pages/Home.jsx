@@ -141,21 +141,20 @@ const Home = () => {
               </div>
 
               {/* Right Column - Company Logo & Branding */}
-              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/20 text-center">
-                <div className="mb-6">
-                  <img 
-  src="/images/mahastar-logo.png" 
-  alt="MahaStar Logo"
-  className="w-256 mx-auto mb-4"
-/>
-                  <h2 className="text-2xl font-bold text-white mb-1">
-                    MahaStar Medical Billing
-                  </h2>
-                  <p className="text-accent font-medium">
-                    & IT Solutions LLC
-                  </p>
-                </div>
-                
+<div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/20 text-center">
+  {/* Your Logo from Supabase */}
+  <img 
+    src={homeContent?.logo_url || 'https://foqmcizermoatgwknwfc.supabase.co/storage/v1/object/public/images/brand/mahastar-logo.png'}
+    alt="MahaStar Medical Billing"
+    className="w-48 mx-auto mb-6"
+  />
+  
+  <h2 className="text-2xl font-bold text-white mb-1">
+    MahaStar Medical Billing
+  </h2>
+  <p className="text-accent font-medium mb-4">
+    & IT Solutions LLC
+  </p>     
                 <div className="w-16 h-1 bg-accent mx-auto mb-6"></div>
                 
                 <div className="grid grid-cols-2 gap-4 mb-6">

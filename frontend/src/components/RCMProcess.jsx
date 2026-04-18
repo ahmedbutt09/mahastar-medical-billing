@@ -1,14 +1,41 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   ClipboardCheck, FileCheck, DollarSign, TrendingUp, 
   Calendar, Shield, Activity, BarChart3, ArrowRight,
-  CheckCircle
+  CheckCircle, Loader
 } from 'lucide-react';
+import api from '../api';
 
 const RCMProcess = () => {
-  // Your RCM process image
-  const rcmImage = '/images/rcm-process-infographic.png';
+  const [processImage, setProcessImage] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Supabase image URL (your uploaded image)
+  const supabaseImageUrl = 'https://foqmcizermoatgwknwfc.supabase.co/storage/v1/object/public/images/process/rcm-process-infographic.png';
+
+  useEffect(() => {
+    // Fetch the image URL from database (optional - can also use direct URL)
+    fetchProcessImage();
+  }, []);
+
+  const fetchProcessImage = async () => {
+    try {
+      // Try to get from database first
+      const response = await api.get('/api/dynamic-page/services/rcm');
+      if (response.data.success && response.data.data?.process_image) {
+        setProcessImage(response.data.data.process_image);
+      } else {
+        // Fallback to direct Supabase URL
+        setProcessImage(supabaseImageUrl);
+      }
+    } catch (error) {
+      console.error('Error fetching process image:', error);
+      setProcessImage(supabaseImageUrl);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Left side steps (first 4)
   const leftSteps = [
@@ -73,6 +100,16 @@ const RCMProcess = () => {
     { title: 'Compliant &', subtitle: 'Efficient' }
   ];
 
+  if (loading) {
+    return (
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <Loader className="w-8 h-8 text-primary animate-spin mx-auto" />
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -107,13 +144,13 @@ const RCMProcess = () => {
             ))}
           </div>
 
-          {/* Center - Image */}
+          {/* Center - Image from Supabase */}
           <div className="relative">
             <div className="absolute -top-4 -left-4 w-32 h-32 bg-primary/10 rounded-full"></div>
             <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-accent/10 rounded-full"></div>
             <div className="relative z-10 bg-gradient-to-br from-primary/5 to-primary/10 rounded-2xl p-4 shadow-xl">
               <img 
-                src={rcmImage}
+                src={processImage}
                 alt="MahaStar RCM Process - 8 Step Revenue Cycle Management"
                 className="rounded-xl w-full object-contain"
               />

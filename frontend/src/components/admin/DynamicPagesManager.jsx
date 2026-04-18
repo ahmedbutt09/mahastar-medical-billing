@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import api from '../../api';
 import toast from 'react-hot-toast';
 import { Plus, Edit, Trash2, Save, X, Layout, Eye, EyeOff } from 'lucide-react';
-
+import ImageUploader from './ImageUploader';
 const DynamicPagesManager = () => {
+  // Add these state variables
+const [heroImage, setHeroImage] = useState('');
+const [processImage, setProcessImage] = useState('');
   const [pages, setPages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -214,7 +217,23 @@ const DynamicPagesManager = () => {
                   />
                 </div>
               </div>
-
+<div className="space-y-4">
+  <ImageUploader 
+    onImageUploaded={(url) => setFormData({...formData, hero_image: url})}
+    currentImage={formData.hero_image}
+    bucket="images"
+    folder="hero"
+    label="Hero Image"
+  />
+  
+  <ImageUploader 
+    onImageUploaded={(url) => setFormData({...formData, process_image: url})}
+    currentImage={formData.process_image}
+    bucket="images"
+    folder="process"
+    label="Process Image"
+  />
+</div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Page Title</label>
                 <input
