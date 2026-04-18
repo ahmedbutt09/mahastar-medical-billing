@@ -155,29 +155,37 @@ const ChatBot = () => {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 w-[400px] bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden" style={{ height: '600px', display: 'flex', flexDirection: 'column' }}>
-      {/* Header */}
-      <div className="bg-gradient-to-r from-dark to-primary text-white px-4 py-3 flex justify-between items-center flex-shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse"></div>
-          <span className="font-semibold">MahaStar Support</span>
-          <span className="text-xs bg-white/20 px-2 py-0.5 rounded">AI Assistant</span>
-        </div>
-        <div className="flex gap-1">
-          <button
-            onClick={() => setIsMinimized(!isMinimized)}
-            className="hover:bg-white/20 rounded-md p-1.5 transition"
-          >
-            {isMinimized ? <Maximize2 size={14} /> : <Minimize2 size={14} />}
-          </button>
-          <button
-            onClick={handleCloseChat}
-            className="hover:bg-white/20 rounded-md p-1.5 transition"
-          >
-            <X size={14} />
-          </button>
-        </div>
-      </div>
+    <div 
+  className={`fixed z-[9999] transition-all duration-300 ease-in-out
+    /* Mobile: Full screen or bottom anchored */
+    bottom-0 right-0 left-0 h-[80vh] w-full 
+    /* Desktop: Side anchored */
+    md:bottom-6 md:right-6 md:left-auto md:w-[380px] md:h-[600px]
+    bg-white shadow-2xl border border-gray-200 overflow-hidden
+    ${isOpen ? 'flex' : 'hidden'} flex-col
+    /* Mobile specific rounded corners */
+    rounded-t-2xl md:rounded-2xl
+  `}
+  style={{ 
+    display: isOpen ? 'flex' : 'none',
+    maxHeight: isMinimized ? '48px' : 'calc(100vh - 100px)' 
+  }}
+>
+ {/* Header */}
+<div className="bg-gradient-to-r from-dark to-primary text-white px-4 py-4 md:py-3 flex justify-between items-center flex-shrink-0">
+  <div className="flex items-center gap-2">
+    <div className="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse"></div>
+    <span className="font-semibold text-sm md:text-base">MahaStar Support</span>
+  </div>
+  <div className="flex gap-2">
+    <button onClick={() => setIsMinimized(!isMinimized)} className="hover:bg-white/20 rounded-md p-2 transition">
+      {isMinimized ? <Maximize2 size={16} /> : <Minimize2 size={16} />}
+    </button>
+    <button onClick={handleCloseChat} className="hover:bg-white/20 rounded-md p-2 transition">
+      <X size={16} />
+    </button>
+  </div>
+</div>
 
       {!isMinimized && (
         <>
@@ -274,22 +282,22 @@ const ChatBot = () => {
             </div>
           )}
 
-          {/* Quick Reply Buttons */}
-          <div className="border-t border-gray-200 p-3 bg-white flex-shrink-0">
-            <div className="flex flex-wrap gap-2 mb-3">
-              {quickReplies.slice(0, 6).map((reply, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => {
-                    setInputMessage(reply.text);
-                    setTimeout(() => handleSendMessage(), 10);
-                  }}
-                  className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full transition"
-                >
-                  {reply.label}
-                </button>
-              ))}
-            </div>
+         {/* Quick Reply Buttons */}
+<div className="border-t border-gray-200 p-3 bg-white flex-shrink-0">
+  <div className="flex overflow-x-auto no-scrollbar gap-2 mb-3 pb-1">
+    {quickReplies.map((reply, idx) => (
+      <button
+        key={idx}
+        onClick={() => {
+          setInputMessage(reply.text);
+          setTimeout(() => handleSendMessage(), 10);
+        }}
+        className="text-[10px] md:text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full transition whitespace-nowrap"
+      >
+        {reply.label}
+      </button>
+    ))}
+  </div>
             
             {/* Input Area */}
             <div className="flex gap-2">
