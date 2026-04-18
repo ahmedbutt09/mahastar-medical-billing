@@ -1,19 +1,29 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Minimize2, Maximize2, Headphones } from 'lucide-react';
+import { MessageCircle, X, Send, Minimize2, Maximize2, Headphones, User, Mail, Phone } from 'lucide-react';
+import api from '../api';
 
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState([
-    { id: 1, type: 'bot', text: '👋 Hi! Welcome to MahaStar Medical Billing. How can I help you today?', timestamp: new Date() }
+    { id: 1, type: 'bot', text: '👋 Hi! Welcome to MahaStar Medical Billing. I\'m your AI assistant. How can I help you today?', timestamp: new Date() }
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [showAgentForm, setShowAgentForm] = useState(false);
+  const [conversationId, setConversationId] = useState(null);
   const [userInfo, setUserInfo] = useState({ name: '', email: '', phone: '', message: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const [messageId, setMessageId] = useState(2);
+
+  useEffect(() => {
+    // Generate unique conversation ID
+    if (!conversationId) {
+      setConversationId('conv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9));
+    }
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -30,30 +40,29 @@ const ChatBot = () => {
     setMessageId(prev => prev + 1);
   };
 
-  const getBotResponse = (userMessage) => {
-    const msg = userMessage.toLowerCase();
-    
-    if (msg.includes('pricing') || msg.includes('cost') || msg.includes('price')) {
-      return "💰 We offer 4 pricing models:\n• End-to-End RCM: 3.5-6.5%\n• Partial RCM: Custom\n• Co-Managed: $45-65/hr\n• FTE Model: $2,500-4,500/mo\n\nWant a custom quote?";
+  const sendToBackend = async (message) => {
+    try {
+      const response = await api.post('/api/chatbot/message', {
+        message: message,
+        conversationId: conversationId
+      });
+      
+      if (response.data.success) {
+        addMessage('bot', response.data.response);
+        
+        if (response.data.requiresHuman) {
+          setTimeout(() => {
+            setShowAgentForm(true);
+            addMessage('bot', "👨‍💼 I'll connect you with a live specialist. Please fill out the form below so they can assist you better.");
+          }, 500);
+        }
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      addMessage('bot', "I'm having trouble connecting. Please try again or email us at info@mahastar.com");
+    } finally {
+      setIsTyping(false);
     }
-    if (msg.includes('demo') || msg.includes('consultation')) {
-      setShowAgentForm(true);
-      return "📅 I'll connect you with a specialist! Please fill out the form below.";
-    }
-    if (msg.includes('coding')) {
-      return "🩺 Our coding services include 99.2% accuracy, AAPC-certified coders, and 15+ specialties. Want a free coding audit?";
-    }
-    if (msg.includes('credentialing')) {
-      return "📄 Get credentialed in 42 days (industry avg: 90+ days). We handle Medicare, Medicaid, and 50+ commercial payers.";
-    }
-    if (msg.includes('ar') || msg.includes('accounts receivable')) {
-      return "📊 Our AR team recovers aged claims with 94% first-call resolution. Want a free AR assessment?";
-    }
-    if (msg.includes('denial')) {
-      return "⚠️ We reduce denial rates by up to 67% with AI-powered prediction and automated appeals.";
-    }
-    
-    return "I can help with:\n💰 Pricing • 📋 Services • 🩺 Coding • 📄 Credentialing • 📊 AR Management • ⚠️ Denials\n\nWhat would you like to know?";
   };
 
   const handleSendMessage = async () => {
@@ -64,11 +73,7 @@ const ChatBot = () => {
     setInputMessage('');
     setIsTyping(true);
     
-    setTimeout(() => {
-      const response = getBotResponse(userMsg);
-      addMessage('bot', response);
-      setIsTyping(false);
-    }, 600);
+    await sendToBackend(userMsg);
   };
 
   const handleKeyPress = (e) => {
@@ -78,23 +83,41 @@ const ChatBot = () => {
     }
   };
 
-  const handleAgentSubmit = (e) => {
+  const handleAgentSubmit = async (e) => {
     e.preventDefault();
     if (!userInfo.name || !userInfo.email) {
       alert('Please enter your name and email');
       return;
     }
     
-    console.log('Agent request:', userInfo);
+    setIsSubmitting(true);
     
-    addMessage('bot', `✅ Thanks ${userInfo.name}! An RCM specialist will contact you at ${userInfo.email} within 24 hours.`);
-    setShowAgentForm(false);
-    setUserInfo({ name: '', email: '', phone: '', message: '' });
+    try {
+      // Save lead to database
+      const response = await api.post('/api/chat/lead', {
+        name: userInfo.name,
+        email: userInfo.email,
+        phone: userInfo.phone,
+        message: userInfo.message || 'Chatbot conversation - requested human agent',
+        conversationId: conversationId
+      });
+      
+      if (response.data.success) {
+        addMessage('bot', `✅ **Thank you ${userInfo.name}!**\n\nAn RCM specialist will contact you at **${userInfo.email}** within 24 hours.\n\nIn the meantime, feel free to ask me any questions!`);
+        setShowAgentForm(false);
+        setUserInfo({ name: '', email: '', phone: '', message: '' });
+      }
+    } catch (error) {
+      console.error('Error submitting lead:', error);
+      addMessage('bot', "I've recorded your request. A specialist will reach out to you soon. You can also email us directly at info@mahastar.com");
+      setShowAgentForm(false);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleTalkToHuman = () => {
     setShowAgentForm(true);
-    addMessage('bot', "👨‍💼 Sure! Please fill out the form below and I'll connect you with a live specialist.");
   };
 
   const handleCloseChat = () => {
@@ -102,6 +125,18 @@ const ChatBot = () => {
     setIsMinimized(false);
     setShowAgentForm(false);
   };
+
+  // Quick reply suggestions
+  const quickReplies = [
+    { label: '💰 Pricing', text: 'Tell me about your pricing' },
+    { label: '📋 Services', text: 'What services do you offer?' },
+    { label: '🩺 Coding', text: 'Tell me about medical coding' },
+    { label: '📄 Credentialing', text: 'How does credentialing work?' },
+    { label: '📊 AR Management', text: 'AR management services' },
+    { label: '⚠️ Denials', text: 'Denial management help' },
+    { label: '🔌 EHR Integration', text: 'EHR integration options' },
+    { label: '📅 Demo', text: 'Schedule a demo' }
+  ];
 
   // Chat button (when closed)
   if (!isOpen) {
@@ -112,7 +147,7 @@ const ChatBot = () => {
         aria-label="Open chat"
       >
         <MessageCircle className="w-6 h-6" />
-        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
           1
         </span>
       </button>
@@ -120,26 +155,24 @@ const ChatBot = () => {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 w-[380px] bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden" style={{ height: '550px', display: 'flex', flexDirection: 'column' }}>
-      {/* Header - STICKY at top, always visible */}
-      <div className="bg-gradient-to-r from-dark to-primary text-white px-4 py-3 flex justify-between items-center flex-shrink-0 sticky top-0">
+    <div className="fixed bottom-6 right-6 z-50 w-[400px] bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden" style={{ height: '600px', display: 'flex', flexDirection: 'column' }}>
+      {/* Header */}
+      <div className="bg-gradient-to-r from-dark to-primary text-white px-4 py-3 flex justify-between items-center flex-shrink-0">
         <div className="flex items-center gap-2">
           <div className="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse"></div>
-          <span className="font-semibold text-sm">MahaStar Support</span>
-          <span className="text-xs bg-white/20 px-2 py-0.5 rounded">Online</span>
+          <span className="font-semibold">MahaStar Support</span>
+          <span className="text-xs bg-white/20 px-2 py-0.5 rounded">AI Assistant</span>
         </div>
         <div className="flex gap-1">
           <button
             onClick={() => setIsMinimized(!isMinimized)}
             className="hover:bg-white/20 rounded-md p-1.5 transition"
-            aria-label="Minimize"
           >
             {isMinimized ? <Maximize2 size={14} /> : <Minimize2 size={14} />}
           </button>
           <button
             onClick={handleCloseChat}
             className="hover:bg-white/20 rounded-md p-1.5 transition"
-            aria-label="Close"
           >
             <X size={14} />
           </button>
@@ -148,14 +181,14 @@ const ChatBot = () => {
 
       {!isMinimized && (
         <>
-          {/* Messages Area - Scrollable, with fixed height */}
+          {/* Messages Area */}
           <div className="flex-1 overflow-y-auto p-4 bg-gray-50 flex flex-col gap-3" style={{ minHeight: 0 }}>
             {messages.map((msg) => (
               <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[85%] rounded-2xl px-3 py-2 whitespace-pre-wrap ${
                   msg.type === 'user'
                     ? 'bg-primary text-white rounded-br-none'
-                    : 'bg-white border border-gray-200 text-gray-700 rounded-bl-none'
+                    : 'bg-white border border-gray-200 text-gray-700 rounded-bl-none shadow-sm'
                 }`}>
                   <div className="text-sm">{msg.text}</div>
                   <div className={`text-xs mt-1 ${msg.type === 'user' ? 'text-blue-100' : 'text-gray-400'}`}>
@@ -166,7 +199,7 @@ const ChatBot = () => {
             ))}
             {isTyping && (
               <div className="flex justify-start">
-                <div className="bg-white border border-gray-200 rounded-2xl rounded-bl-none px-4 py-2">
+                <div className="bg-white border border-gray-200 rounded-2xl rounded-bl-none px-4 py-2 shadow-sm">
                   <div className="flex gap-1">
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
@@ -178,67 +211,82 @@ const ChatBot = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Agent Contact Form - Now scrollable within messages area if needed */}
+          {/* Agent Contact Form */}
           {showAgentForm && (
-            <div className="border-t border-gray-200 p-3 bg-gray-50 flex-shrink-0">
-              <form onSubmit={handleAgentSubmit} className="space-y-2">
-                <input
-                  type="text"
-                  placeholder="Your Name *"
-                  value={userInfo.name}
-                  onChange={(e) => setUserInfo({...userInfo, name: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary focus:border-primary"
-                  required
-                />
-                <input
-                  type="email"
-                  placeholder="Email Address *"
-                  value={userInfo.email}
-                  onChange={(e) => setUserInfo({...userInfo, email: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary focus:border-primary"
-                  required
-                />
-                <input
-                  type="tel"
-                  placeholder="Phone (optional)"
-                  value={userInfo.phone}
-                  onChange={(e) => setUserInfo({...userInfo, phone: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary focus:border-primary"
-                />
+            <div className="border-t border-gray-200 p-4 bg-white shadow-lg">
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="font-semibold text-dark">Connect with a Specialist</h3>
+                <button 
+                  onClick={() => setShowAgentForm(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <form onSubmit={handleAgentSubmit} className="space-y-3">
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder="Your Name *"
+                    value={userInfo.name}
+                    onChange={(e) => setUserInfo({...userInfo, name: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2 text-sm focus:ring-primary focus:border-primary"
+                    required
+                  />
+                </div>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="email"
+                    placeholder="Email Address *"
+                    value={userInfo.email}
+                    onChange={(e) => setUserInfo({...userInfo, email: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2 text-sm focus:ring-primary focus:border-primary"
+                    required
+                  />
+                </div>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="tel"
+                    placeholder="Phone (optional)"
+                    value={userInfo.phone}
+                    onChange={(e) => setUserInfo({...userInfo, phone: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2 text-sm focus:ring-primary focus:border-primary"
+                  />
+                </div>
                 <textarea
-                  placeholder="How can we help?"
+                  placeholder="How can we help you?"
                   rows="2"
                   value={userInfo.message}
                   onChange={(e) => setUserInfo({...userInfo, message: e.target.value})}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary focus:border-primary"
                 />
-                <button type="submit" className="w-full bg-primary text-white py-2 rounded-lg text-sm font-semibold hover:bg-secondary transition">
-                  Send Request →
-                </button>
                 <button 
-                  type="button"
-                  onClick={() => setShowAgentForm(false)}
-                  className="w-full text-gray-500 text-sm py-1 hover:text-gray-700 transition"
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full bg-primary text-white py-2 rounded-lg text-sm font-semibold hover:bg-secondary transition disabled:opacity-50"
                 >
-                  Cancel
+                  {isSubmitting ? 'Sending...' : 'Send Request →'}
                 </button>
               </form>
             </div>
           )}
 
-          {/* Quick Reply Buttons - Always at bottom */}
+          {/* Quick Reply Buttons */}
           <div className="border-t border-gray-200 p-3 bg-white flex-shrink-0">
             <div className="flex flex-wrap gap-2 mb-3">
-              {['Pricing', 'Services', 'Demo', 'Credentialing', 'Coding'].map((btn) => (
+              {quickReplies.slice(0, 6).map((reply, idx) => (
                 <button
-                  key={btn}
+                  key={idx}
                   onClick={() => {
-                    setInputMessage(btn);
+                    setInputMessage(reply.text);
                     setTimeout(() => handleSendMessage(), 10);
                   }}
                   className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full transition"
                 >
-                  {btn}
+                  {reply.label}
                 </button>
               ))}
             </div>
@@ -266,7 +314,7 @@ const ChatBot = () => {
 
           {/* Footer */}
           <div className="bg-gray-50 border-t border-gray-200 p-2 text-center text-xs text-gray-400 flex justify-center gap-4 flex-shrink-0">
-            <span>⚡ Usually replies in seconds</span>
+            <span>⚡ AI-powered responses</span>
             <button onClick={handleTalkToHuman} className="text-primary hover:underline flex items-center gap-1">
               <Headphones size={12} /> Talk to human
             </button>

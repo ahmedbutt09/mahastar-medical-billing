@@ -2230,6 +2230,174 @@ app.patch('/api/dynamic-page/:id/toggle', async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+// ============= CHATBOT ENDPOINTS =============
+
+// Chatbot AI response endpoint
+app.post('/api/chatbot/message', async (req, res) => {
+  try {
+    const { message, conversationId } = req.body;
+    const userMessage = message.toLowerCase();
+    
+    // Define response patterns
+    const responses = {
+      greeting: ['hello', 'hi', 'hey', 'greetings', 'good morning', 'good afternoon'],
+      pricing: ['pricing', 'cost', 'price', 'how much', 'fee', 'rates', 'expensive'],
+      services: ['services', 'offer', 'provide', 'what do you do', 'solutions'],
+      coding: ['coding', 'medical coding', 'coder', 'cpt', 'icd'],
+      credentialing: ['credentialing', 'enrollment', 'panel', 'credential', 'caqh'],
+      ar: ['ar', 'accounts receivable', 'collection', 'recovery', 'aging'],
+      denial: ['denial', 'rejection', 'appeal', 'denied'],
+      rcm: ['rcm', 'revenue cycle', 'end to end', 'full cycle'],
+      ehr: ['ehr', 'integration', 'epic', 'cerner', 'athena', 'ecw'],
+      specialties: ['specialty', 'cardiology', 'orthopedic', 'neurology', 'pediatrics'],
+      demo: ['demo', 'consultation', 'meeting', 'call', 'discuss'],
+      about: ['about', 'company', 'mahaStar', 'who are you', 'background'],
+      support: ['support', 'help', 'issue', 'problem', 'trouble'],
+      timeline: ['how long', 'timeline', 'start', 'implement', 'onboard'],
+      compliance: ['hipaa', 'compliance', 'security', 'soc2', 'audit']
+    };
+    
+    const responseTexts = {
+      greeting: "👋 Hello! Welcome to MahaStar Medical Billing. I'm here to help with your RCM needs. What would you like to know about?",
+      
+      pricing: "💰 **Pricing Options:**\n\n• **End-to-End RCM:** 3.5% - 6.5% of collections\n• **Partial RCM:** Custom pricing based on modules\n• **Co-Managed:** $45 - $65 per hour\n• **FTE Model:** $2,500 - $4,500 per month\n\nWould you like a custom quote for your practice?",
+      
+      services: "📋 **Our Core Services:**\n\n• Revenue Cycle Management\n• Medical Coding (99.2% accuracy)\n• AR Management & Recovery\n• Provider Credentialing\n• Denial Management\n• Telehealth Billing\n\nWhich service interests you most?",
+      
+      coding: "🩺 **Medical Coding Services:**\n\n• 99.2% coding accuracy\n• AAPC-certified coders\n• 15+ medical specialties\n• ICD-10, CPT, HCPCS coding\n• NCCI compliance\n• Free coding audit available!\n\nWould you like a free coding assessment?",
+      
+      credentialing: "📄 **Provider Credentialing:**\n\n• 45 days average completion (industry: 90+ days)\n• Medicare, Medicaid, Commercial payers\n• CAQH management\n• 94% first-pass approval rate\n\nNeed help with credentialing?",
+      
+      ar: "📊 **AR Management:**\n\n• $2.5M+ monthly AR recovered\n• <30 days average resolution\n• 94% first-call resolution\n• Aged claim recovery specialists\n\nWant a free AR assessment?",
+      
+      denial: "⚠️ **Denial Management:**\n\n• 50% denial reduction average\n• AI-powered prediction (89% accuracy)\n• Root cause analysis\n• Automated appeals process\n\nLet's analyze your denial patterns!",
+      
+      rcm: "🔄 **Revenue Cycle Management:**\n\nComplete end-to-end solution from patient registration to final payment. We optimize every step of your revenue cycle for maximum collections.\n\nWant to see our RCM dashboard?",
+      
+      ehr: "🔌 **EHR Integrations:**\n\nWe integrate with: Epic, Cerner, eClinicalWorks, Athenahealth, NextGen, Allscripts, Kareo, Practice Fusion, and 50+ more.\n\nSeamless data flow, no disruption to your workflow.",
+      
+      specialties: "🏥 **Specialties We Serve:**\n\nCardiology, Orthopedics, Neurology, Primary Care, Pediatrics, Ophthalmology, Dermatology, Urology, Gastroenterology, Oncology, Radiology, Anesthesiology, Psychiatry, and more.\n\nWe have specialty-specific certified coders!",
+      
+      demo: "📅 **Schedule a Consultation:**\n\nI'll connect you with an RCM specialist. Please provide your name and email, and someone will contact you within 24 hours.\n\nWould you like to schedule now?",
+      
+      about: "⭐ **About MahaStar:**\n\n• 15+ years of experience\n• 500+ healthcare providers served\n• 99.2% coding accuracy\n• HIPAA & SOC2 Type II compliant\n• 98% client retention rate\n\nWe're dedicated to maximizing your revenue!",
+      
+      support: "🛟 **Support Options:**\n\n• Live chat (24/7)\n• Phone: (555) 123-4567\n• Email: support@mahastar.com\n• Schedule a call with a specialist\n\nHow can we help you today?",
+      
+      timeline: "⏱️ **Implementation Timeline:**\n\n• Assessment: 2-3 days\n• Setup & Integration: 5-7 days\n• Training: 2-3 days\n• Go-live: Day 10-14\n\nFull RCM transition in 2 weeks!",
+      
+      compliance: "🔒 **Compliance & Security:**\n\n• HIPAA Compliant\n• SOC2 Type II Certified\n• VAPT Audited\n• BAAs signed\n• Enterprise-grade encryption\n\nYour data is safe with us!"
+    };
+    
+    // Default response with options
+    const defaultResponse = "I can help you with:\n💰 Pricing & Quotes\n📋 Services & Solutions\n🩺 Medical Coding\n📄 Provider Credentialing\n📊 AR Management\n⚠️ Denial Management\n🔌 EHR Integration\n📅 Schedule a Demo\n\nWhat would you like to learn more about?";
+    
+    // Find matching response
+    let response = defaultResponse;
+    for (const [key, keywords] of Object.entries(responses)) {
+      if (keywords.some(keyword => userMessage.includes(keyword))) {
+        response = responseTexts[key];
+        break;
+      }
+    }
+    
+    // Store conversation in database
+    await supabaseAdmin
+      .from('chat_conversations')
+      .insert([{ 
+        message: message, 
+        response: response, 
+        conversation_id: conversationId || 'guest',
+        created_at: new Date() 
+      }]);
+    
+    res.status(200).json({ 
+      success: true, 
+      response: response,
+      requiresHuman: userMessage.includes('human') || userMessage.includes('agent') || userMessage.includes('talk to') || userMessage.includes('speak with')
+    });
+    
+  } catch (error) {
+    console.error('Chatbot error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get chat history (admin)
+app.get('/api/chatbot/conversations', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('chat_conversations')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(100);
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+// Chat lead submission
+app.post('/api/chat/lead', async (req, res) => {
+  try {
+    const { name, email, phone, message, conversationId } = req.body;
+    
+    const { data, error } = await supabaseAdmin
+      .from('chat_lead_requests')
+      .insert([{ 
+        name, 
+        email, 
+        phone: phone || null, 
+        message: message || 'Chat conversation',
+        status: 'pending',
+        created_at: new Date() 
+      }])
+      .select();
+    
+    if (error) throw error;
+    
+    res.status(200).json({ success: true, message: 'Lead submitted successfully' });
+  } catch (error) {
+    console.error('Error saving chat lead:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+// Get chat leads (admin)
+app.get('/api/chat/leads', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('chat_lead_requests')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error fetching chat leads:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Update chat lead status
+app.put('/api/chat/leads/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    const { data, error } = await supabaseAdmin
+      .from('chat_lead_requests')
+      .update({ status, responded_at: new Date() })
+      .eq('id', id)
+      .select();
+    
+    if (error) throw error;
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error updating chat lead:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 // A simple health check to test if the backend is alive
 // Health check for Vercel testing
