@@ -146,7 +146,7 @@ const Home = () => {
   <img 
   src={homeContent?.logo_url || 'https://foqmcizermoatgwknwfc.supabase.co/storage/v1/object/public/images/brand/mahastar-logo.png'}
   alt="MahaStar Medical Billing"
-  className="w-48 sm:w-56 md:w-64 mx-auto mb-6"
+  className="w-48 sm:w-56 md:w-256 mx-auto mb-6"
 />
   
   <h2 className="text-2xl font-bold text-white mb-1">
